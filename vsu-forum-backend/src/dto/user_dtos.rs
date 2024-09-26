@@ -9,11 +9,11 @@ pub struct UserDTO {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RegisterDTO {
     pub login: String,
-    pub password: String
+    pub password: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LoginDTO {
     pub login: String,
-    pub password: String
+    pub password: String,
 }

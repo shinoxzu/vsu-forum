@@ -5,7 +5,7 @@ use serde::Deserialize;
 pub struct AppConfig {
     pub db_connstring: String,
     pub log_level: String,
-    pub log_filters: String
+    pub log_filters: String,
 }
 
 pub fn load_config(path: &str) -> anyhow::Result<AppConfig> {
