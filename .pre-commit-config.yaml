@@ -3,4 +3,6 @@ repos:
     rev: v1.0
     hooks:
     -   id: fmt
-    -   id: cargo-check
+        args: ['--manifest-path', './vsu-forum-backend/Cargo.toml', '--']
+    -   id: clippy
+        args: ['--manifest-path', './vsu-forum-backend/Cargo.toml']

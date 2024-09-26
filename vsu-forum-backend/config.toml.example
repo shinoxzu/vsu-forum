@@ -1,0 +1,3 @@
+db_connstring="postgres://user:password@localhost/vsu_forum"
+log_level="debug"
+log_filters=""
