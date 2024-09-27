@@ -1,4 +1,5 @@
 use axum::{
+    debug_handler,
     extract::{Path, State},
     http::StatusCode,
     Json,
@@ -14,6 +15,7 @@ use crate::{
     tools::hash_text,
 };
 
+#[debug_handler]
 pub async fn register_user(
     State(state): State<ApplicationState>,
     ValidatedJson(register_dto): ValidatedJson<RegisterDTO>,

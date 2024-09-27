@@ -1,12 +1,8 @@
 use async_trait::async_trait;
 use axum::{
-    extract::{
-        rejection::{FormRejection, JsonRejection},
-        Form, FromRequest, Request,
-    },
+    extract::{rejection::JsonRejection, FromRequest, Json, Request},
     http::StatusCode,
     response::{IntoResponse, Response},
-    Json,
 };
 use serde::de::DeserializeOwned;
 use thiserror::Error;
@@ -22,7 +18,7 @@ impl<T, S> FromRequest<S> for ValidatedJson<T>
 where
     T: DeserializeOwned + Validate,
     S: Send + Sync,
-    Form<T>: FromRequest<S, Rejection = FormRejection>,
+    Json<T>: FromRequest<S, Rejection = JsonRejection>,
 {
     type Rejection = JsonValidatationError;
 
