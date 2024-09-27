@@ -1,2 +1,3 @@
 pub mod common;
-pub mod user_dtos;
+pub mod error;
+pub mod user;

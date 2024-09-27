@@ -7,22 +7,32 @@ use axum::{
 use crate::{
     dto::{
         common::ObjectCreatedDTO,
-        user_dtos::{LoginDTO, RegisterDTO, UserDTO},
+        user::{LoginDTO, RegisterDTO, UserDTO},
     },
+    extractors::ValidatedJson,
     state::ApplicationState,
+    tools::hash_text,
 };
 
-#[axum::debug_handler]
 pub async fn register_user(
     State(state): State<ApplicationState>,
-    Json(register_dto): Json<RegisterDTO>,
+    ValidatedJson(register_dto): ValidatedJson<RegisterDTO>,
 ) -> (StatusCode, Json<ObjectCreatedDTO>) {
-    (StatusCode::CREATED, Json(ObjectCreatedDTO { id: 1 }))
+    let result = sqlx::query_scalar!(
+        "insert into users(login, password_hash) values ($1, $2) returning id",
+        register_dto.login,
+        hash_text(register_dto.password)
+    )
+    .fetch_one(&state.db_pool)
+    .await
+    .unwrap();
+
+    (StatusCode::CREATED, Json(ObjectCreatedDTO { id: result }))
 }
 
 pub async fn login_user(
     State(state): State<ApplicationState>,
-    Json(login_dto): Json<LoginDTO>,
+    ValidatedJson(login_dto): ValidatedJson<LoginDTO>,
 ) -> (StatusCode, Json<ObjectCreatedDTO>) {
     (StatusCode::CREATED, Json(ObjectCreatedDTO { id: 1 }))
 }

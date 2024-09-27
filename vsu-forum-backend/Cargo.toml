@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+thiserror = { version = "1.0" }
+async-trait = { version = "0.1" }
+validator = { version = "0.18", features = ["derive"] }
+jsonwebtoken = "9"
+sha3 = { version = "0.10" }
 axum = {version = "0.7", features = ["macros"] }
 sqlx = { version = "0.8", features = [ "runtime-tokio", "postgres", "migrate", "macros" ] }
 anyhow = "1.0"

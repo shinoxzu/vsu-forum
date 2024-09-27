@@ -1,6 +1,6 @@
 create table users (
     id INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    login text NOT NULL ,
+    login text NOT NULL UNIQUE,
     password_hash BYTEA NOT NULL 
 );
 

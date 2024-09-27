@@ -1,4 +1,5 @@
 pub mod dto;
+mod extractors;
 pub mod handlers;
 pub mod models;
 pub mod state;
@@ -7,7 +8,10 @@ pub mod tools;
 use std::{env::var, path::Path, str::FromStr};
 
 use anyhow::Context;
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 use sqlx::{migrate::Migrator, postgres::PgPoolOptions};
@@ -41,8 +45,8 @@ async fn main() -> anyhow::Result<()> {
         .expect("cannot run migrations");
 
     let app = Router::new()
-        .route("/users/register", get(register_user))
-        .route("/users/login", get(login_user))
+        .route("/users/register", post(register_user))
+        .route("/users/login", post(login_user))
         .route("/users/:id", get(get_user))
         .with_state(ApplicationState { config, db_pool });
 
