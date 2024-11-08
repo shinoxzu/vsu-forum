@@ -13,9 +13,7 @@ use crate::{
     },
     errors::ApiError,
     extractors::ValidatedJson,
-    models::user::User,
     state::ApplicationState,
-    tools::hash_text,
 };
 
 pub async fn register_user(

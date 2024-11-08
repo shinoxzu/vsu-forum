@@ -1,4 +1,5 @@
 pub mod post;
+pub mod report;
 pub mod topic;
 pub mod topic_caregory;
 pub mod user;

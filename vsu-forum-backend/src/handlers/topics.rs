@@ -12,7 +12,6 @@ use crate::{
     },
     errors::ApiError,
     extractors::ValidatedJson,
-    models::topic::Topic,
     state::ApplicationState,
 };
 

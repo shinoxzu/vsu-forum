@@ -19,6 +19,8 @@ use log::LevelFilter;
 use sqlx::{migrate::Migrator, postgres::PgPoolOptions};
 use tower_http::cors::CorsLayer;
 
+use crate::handlers::posts::{create_post, get_post, get_posts};
+use crate::handlers::reports::{create_report, get_report, get_reports};
 use handlers::{
     topics::{create_topic, get_topic, get_topics},
     topics_categories::{create_topic_category, get_topic_categories, get_topic_category},
@@ -65,12 +67,18 @@ async fn main() -> anyhow::Result<()> {
         .route("/topics", get(get_topics))
         .route("/topics/:id", get(get_topic))
         .route("/topics-categories", get(get_topic_categories))
-        .route("/topics-categories/:id", get(get_topic_category));
+        .route("/topics-categories/:id", get(get_topic_category))
+        .route("/posts", get(get_posts))
+        .route("/posts/:id", get(get_post))
+        .route("/reports", get(get_reports))
+        .route("/reports/:id", get(get_report));
 
     let secure_router = Router::new()
         .route("/users/me", get(get_me))
         .route("/topics", post(create_topic))
         .route("/topics-categories", post(create_topic_category))
+        .route("/posts", post(create_post))
+        .route("/reports", post(create_report))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),
             middlewares::auth::auth_middleware,
@@ -80,7 +88,7 @@ async fn main() -> anyhow::Result<()> {
         .merge(router)
         .merge(secure_router)
         .with_state(state.clone())
-        .layer(CorsLayer::permissive()); // TODOL adjust cors settings
+        .layer(CorsLayer::permissive()); // TODO: adjust cors settings
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
         .await
