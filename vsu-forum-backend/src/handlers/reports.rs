@@ -9,13 +9,14 @@ use crate::{
     dto::{claims::Claims, common::ObjectCreatedDTO},
     errors::ApiError,
     extractors::ValidatedJson,
+    models::Report,
     state::ApplicationState,
 };
 
 pub async fn get_reports(
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<Vec<ReportDTO>>), ApiError> {
-    let reports = sqlx::query_as!(Post, "select * from reports")
+    let reports = sqlx::query_as!(Report, "select * from reports")
         .fetch_all(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?
@@ -65,7 +66,7 @@ pub async fn create_report(
     ValidatedJson(create_report_dto): ValidatedJson<CreateReportDTO>,
 ) -> Result<(StatusCode, Json<ObjectCreatedDTO>), ApiError> {
     let result = sqlx::query_scalar!(
-        "insert into report(author_id, reported_user_id) values ($1, $2) returning id",
+        "insert into reports(author_id, reported_user_id) values ($1, $2) returning id",
         claims.user_id,
         create_report_dto.reported_user_id,
     )

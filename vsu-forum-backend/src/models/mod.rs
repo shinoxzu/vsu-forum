@@ -5,6 +5,7 @@ pub mod topic_caregory;
 pub mod user;
 
 pub use post::Post;
+pub use report::Report;
 pub use topic::Topic;
 pub use topic_caregory::TopicCategory;
 pub use user::User;

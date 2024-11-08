@@ -12,6 +12,7 @@ use crate::{
     },
     errors::ApiError,
     extractors::ValidatedJson,
+    models::Topic,
     state::ApplicationState,
 };
 

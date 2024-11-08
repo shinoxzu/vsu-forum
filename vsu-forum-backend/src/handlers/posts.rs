@@ -9,6 +9,7 @@ use crate::{
     dto::{claims::Claims, common::ObjectCreatedDTO},
     errors::ApiError,
     extractors::ValidatedJson,
+    models::Post,
     state::ApplicationState,
 };
 
