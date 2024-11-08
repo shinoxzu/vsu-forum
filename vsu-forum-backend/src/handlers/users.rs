@@ -1,50 +1,116 @@
 use axum::{
-    debug_handler,
     extract::{Path, State},
     http::StatusCode,
     Json,
 };
+use chrono::{Duration, Utc};
+use jsonwebtoken::{encode, EncodingKey, Header};
 
 use crate::{
     dto::{
+        claims::Claims,
         common::ObjectCreatedDTO,
-        user::{LoginDTO, RegisterDTO, UserDTO},
+        user::{AuthorizedUserDTO, LoginDTO, RegisterDTO, UserDTO},
     },
+    errors::ApiError,
     extractors::ValidatedJson,
+    models::user::User,
     state::ApplicationState,
     tools::hash_text,
 };
 
-#[debug_handler]
 pub async fn register_user(
     State(state): State<ApplicationState>,
     ValidatedJson(register_dto): ValidatedJson<RegisterDTO>,
-) -> (StatusCode, Json<ObjectCreatedDTO>) {
-    let result = sqlx::query_scalar!(
-        "insert into users(login, password_hash) values ($1, $2) returning id",
-        register_dto.login,
-        hash_text(register_dto.password)
+) -> Result<(StatusCode, Json<ObjectCreatedDTO>), ApiError> {
+    let user = sqlx::query_as!(
+        User,
+        "select * from users where login = $1",
+        register_dto.login
     )
-    .fetch_one(&state.db_pool)
+    .fetch_optional(&state.db_pool)
     .await
-    .unwrap();
+    .map_err(|_| ApiError::InternalServerError)?;
 
-    (StatusCode::CREATED, Json(ObjectCreatedDTO { id: result }))
+    match user {
+        Some(_) => Err(ApiError::BadRequest(
+            "user with this login already registered".to_string(),
+        )),
+        None => {
+            let result = sqlx::query_scalar!(
+                "insert into users(login, password_hash) values ($1, $2) returning id",
+                register_dto.login,
+                hash_text(register_dto.password)
+            )
+            .fetch_one(&state.db_pool)
+            .await
+            .map_err(|_| ApiError::InternalServerError)?;
+
+            Result::Ok((StatusCode::CREATED, Json(ObjectCreatedDTO { id: result })))
+        }
+    }
 }
 
 pub async fn login_user(
     State(state): State<ApplicationState>,
     ValidatedJson(login_dto): ValidatedJson<LoginDTO>,
-) -> (StatusCode, Json<ObjectCreatedDTO>) {
-    (StatusCode::CREATED, Json(ObjectCreatedDTO { id: 1 }))
+) -> Result<(StatusCode, Json<AuthorizedUserDTO>), ApiError> {
+    let user = sqlx::query_as!(
+        User,
+        "select * from users where login = $1 and password_hash = $2",
+        login_dto.login,
+        hash_text(login_dto.password)
+    )
+    .fetch_optional(&state.db_pool)
+    .await
+    .map_err(|_| ApiError::InternalServerError)?;
+
+    match user {
+        Some(user) => {
+            let claims = Claims {
+                exp: (Utc::now() + Duration::days(31)).timestamp() as usize,
+                sub: user.login,
+                user_id: user.id,
+            };
+            let token = encode(
+                &Header::default(),
+                &claims,
+                &EncodingKey::from_secret(state.config.jwt.secret_key.as_ref()),
+            )
+            .map_err(|_| ApiError::InternalServerError)?;
+
+            Ok((
+                StatusCode::OK,
+                Json(AuthorizedUserDTO { token, id: user.id }),
+            ))
+        }
+        None => Err(ApiError::OtherError(
+            StatusCode::UNAUTHORIZED,
+            "login or password is incorrect".to_string(),
+        )),
+    }
 }
 
 pub async fn get_user(
-    Path(user_id): Path<i32>,
+    Path(user_id): Path<i64>,
     State(state): State<ApplicationState>,
-) -> Json<UserDTO> {
-    Json(UserDTO {
-        id: 1,
-        login: "".to_string(),
-    })
+) -> Result<(StatusCode, Json<UserDTO>), ApiError> {
+    let user = sqlx::query_as!(User, "select * from users where id = $1", user_id)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    match user {
+        Some(user) => Ok((
+            StatusCode::OK,
+            Json(UserDTO {
+                id: user.id,
+                login: user.login,
+            }),
+        )),
+        None => Err(ApiError::OtherError(
+            StatusCode::NOT_FOUND,
+            "user not found".to_string(),
+        )),
+    }
 }

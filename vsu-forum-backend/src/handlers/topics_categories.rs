@@ -1,62 +1,57 @@
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    Extension, Json,
+    Json,
 };
 
 use crate::{
     dto::{
-        claims::Claims,
         common::ObjectCreatedDTO,
-        topic::{CreateTopicDTO, TopicDTO},
+        topic_category::{CreateTopicCategoryDTO, TopicCategoryDTO},
     },
     errors::ApiError,
     extractors::ValidatedJson,
-    models::topic::Topic,
+    models::TopicCategory,
     state::ApplicationState,
 };
 
-pub async fn get_topics(
+pub async fn get_topic_categories(
     State(state): State<ApplicationState>,
-) -> Result<(StatusCode, Json<Vec<TopicDTO>>), ApiError> {
-    let topics = sqlx::query_as!(Topic, "select * from topics")
+) -> Result<(StatusCode, Json<Vec<TopicCategoryDTO>>), ApiError> {
+    let topics_categories = sqlx::query_as!(TopicCategory, "select * from topics_categories")
         .fetch_all(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?
         .iter()
-        .map(|t| TopicDTO {
+        .map(|t| TopicCategoryDTO {
             id: t.id,
-            author_id: t.author_id,
-            category_id: t.category_id,
             name: t.name.clone(),
         })
         .collect();
 
-    Ok((StatusCode::OK, Json(topics)))
+    Ok((StatusCode::OK, Json(topics_categories)))
 }
 
-pub async fn get_topic(
-    Path(topic_id): Path<i64>,
+pub async fn get_topic_category(
+    Path(topic_category_id): Path<i64>,
     State(state): State<ApplicationState>,
-) -> Result<(StatusCode, Json<TopicDTO>), ApiError> {
-    let topic = sqlx::query_as!(
-        Topic,
-        "select * from topics where id = $1 limit 1",
-        topic_id
+) -> Result<(StatusCode, Json<TopicCategoryDTO>), ApiError> {
+    let topic_category = sqlx::query_as!(
+        TopicCategory,
+        "select * from topics_categories where id = $1 limit 1",
+        topic_category_id
     )
     .fetch_optional(&state.db_pool)
     .await
     .map_err(|_| ApiError::InternalServerError)?;
 
-    match topic {
+    match topic_category {
         Some(topic) => {
-            let topic_dto = TopicDTO {
+            let topic_category_dto = TopicCategoryDTO {
                 id: topic.id,
-                author_id: topic.author_id,
-                category_id: topic.category_id,
                 name: topic.name,
             };
-            Ok((StatusCode::OK, Json(topic_dto)))
+            Ok((StatusCode::OK, Json(topic_category_dto)))
         }
         None => Err(ApiError::OtherError(
             StatusCode::NOT_FOUND,
@@ -65,16 +60,13 @@ pub async fn get_topic(
     }
 }
 
-pub async fn create_topic(
+pub async fn create_topic_category(
     State(state): State<ApplicationState>,
-    Extension(claims): Extension<Claims>,
-    ValidatedJson(create_topic_dto): ValidatedJson<CreateTopicDTO>,
+    ValidatedJson(create_category_dto): ValidatedJson<CreateTopicCategoryDTO>,
 ) -> Result<(StatusCode, Json<ObjectCreatedDTO>), ApiError> {
     let result = sqlx::query_scalar!(
-        "insert into topics(author_id, category_id, name) values ($1, $2, $3) returning id",
-        claims.user_id,
-        create_topic_dto.category_id,
-        create_topic_dto.name
+        "insert into topics_categories(name) values ($1) returning id",
+        create_category_dto.name
     )
     .fetch_one(&state.db_pool)
     .await

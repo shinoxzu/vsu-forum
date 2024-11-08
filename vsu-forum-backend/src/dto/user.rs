@@ -3,7 +3,7 @@ use validator::Validate;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserDTO {
-    pub id: i32,
+    pub id: i64,
     pub login: String,
 }
 
@@ -23,6 +23,6 @@ pub struct LoginDTO {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AuthorizedUserDTO {
-    pub id: i32,
+    pub id: i64,
     pub token: String,
 }
