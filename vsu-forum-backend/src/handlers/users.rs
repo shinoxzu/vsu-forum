@@ -1,7 +1,7 @@
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    Json,
+    Extension, Json,
 };
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -9,7 +9,6 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use crate::{
     dto::{
         claims::Claims,
-        common::ObjectCreatedDTO,
         user::{AuthorizedUserDTO, LoginDTO, RegisterDTO, UserDTO},
     },
     errors::ApiError,
@@ -22,7 +21,7 @@ use crate::{
 pub async fn register_user(
     State(state): State<ApplicationState>,
     ValidatedJson(register_dto): ValidatedJson<RegisterDTO>,
-) -> Result<(StatusCode, Json<ObjectCreatedDTO>), ApiError> {
+) -> Result<(StatusCode, Json<AuthorizedUserDTO>), ApiError> {
     let user = sqlx::query_as!(
         User,
         "select * from users where login = $1",
@@ -46,7 +45,22 @@ pub async fn register_user(
             .await
             .map_err(|_| ApiError::InternalServerError)?;
 
-            Result::Ok((StatusCode::CREATED, Json(ObjectCreatedDTO { id: result })))
+            let claims = Claims {
+                exp: (Utc::now() + Duration::days(31)).timestamp() as usize,
+                sub: register_dto.login,
+                user_id: result,
+            };
+            let token = encode(
+                &Header::default(),
+                &claims,
+                &EncodingKey::from_secret(state.config.jwt.secret_key.as_ref()),
+            )
+            .map_err(|_| ApiError::InternalServerError)?;
+
+            Ok((
+                StatusCode::CREATED,
+                Json(AuthorizedUserDTO { token, id: result }),
+            ))
         }
     }
 }
@@ -96,6 +110,30 @@ pub async fn get_user(
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<UserDTO>), ApiError> {
     let user = sqlx::query_as!(User, "select * from users where id = $1", user_id)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    match user {
+        Some(user) => Ok((
+            StatusCode::OK,
+            Json(UserDTO {
+                id: user.id,
+                login: user.login,
+            }),
+        )),
+        None => Err(ApiError::OtherError(
+            StatusCode::NOT_FOUND,
+            "user not found".to_string(),
+        )),
+    }
+}
+
+pub async fn get_me(
+    Extension(claims): Extension<Claims>,
+    State(state): State<ApplicationState>,
+) -> Result<(StatusCode, Json<UserDTO>), ApiError> {
+    let user = sqlx::query_as!(User, "select * from users where id = $1", claims.user_id)
         .fetch_optional(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?;

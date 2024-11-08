@@ -17,11 +17,12 @@ use axum::{
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 use sqlx::{migrate::Migrator, postgres::PgPoolOptions};
+use tower_http::cors::CorsLayer;
 
 use handlers::{
     topics::{create_topic, get_topic, get_topics},
     topics_categories::{create_topic_category, get_topic_categories, get_topic_category},
-    users::{get_user, login_user, register_user},
+    users::{get_me, get_user, login_user, register_user},
 };
 use state::ApplicationState;
 
@@ -67,6 +68,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/topics-categories/:id", get(get_topic_category));
 
     let secure_router = Router::new()
+        .route("/users/me", get(get_me))
         .route("/topics", post(create_topic))
         .route("/topics-categories", post(create_topic_category))
         .route_layer(axum::middleware::from_fn_with_state(
@@ -77,7 +79,8 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         .merge(router)
         .merge(secure_router)
-        .with_state(state.clone());
+        .with_state(state.clone())
+        .layer(CorsLayer::permissive()); // TODOL adjust cors settings
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
         .await
