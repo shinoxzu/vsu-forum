@@ -5,8 +5,19 @@ use sha3::{Digest, Sha3_256};
 #[derive(Deserialize, Clone, Debug)]
 pub struct AppConfig {
     pub db_connstring: String,
-    pub log_level: String,
-    pub log_filters: String,
+    pub logging: LoggingConfig,
+    pub jwt: JwtConfig,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct LoggingConfig {
+    pub level: String,
+    pub filters: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct JwtConfig {
+    pub secret_key: String,
 }
 
 pub fn hash_text(text: String) -> Vec<u8> {

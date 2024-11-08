@@ -8,7 +8,7 @@ use serde::de::DeserializeOwned;
 use thiserror::Error;
 use validator::Validate;
 
-use crate::dto::error::ErrorDTO;
+use crate::dto::error::ErrorWithDataDTO;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ValidatedJson<T>(pub T);
@@ -42,14 +42,14 @@ impl IntoResponse for JsonValidatationError {
     fn into_response(self) -> Response {
         match self {
             JsonValidatationError::ValidationError(validation_errors) => {
-                let error = ErrorDTO {
+                let error = ErrorWithDataDTO {
                     err: "validation error occurred".to_string(),
                     data: validation_errors,
                 };
                 (StatusCode::BAD_REQUEST, Json(error)).into_response()
             }
             JsonValidatationError::AxumJsonRejection(resson) => {
-                let error = ErrorDTO {
+                let error = ErrorWithDataDTO {
                     err: "passed json is invalid".to_string(),
                     data: resson.to_string(),
                 };
