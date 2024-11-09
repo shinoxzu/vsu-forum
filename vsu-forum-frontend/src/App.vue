@@ -5,14 +5,13 @@ import Button from 'primevue/button';
 </script>
 
 <template>
-  
   <header>
     <h1>Форум ВГУ</h1>
     <nav>
-      <Button as="router-link" target="_blank" rel="noopener" label="Главная" to="/" />
-      <Button as="router-link" target="_blank" rel="noopener" label="Регистрация" to="/register" />
-      <Button as="router-link" target="_blank" rel="noopener" label="Вход" to="/login" />
-      <Button as="router-link" target="_blank" rel="noopener" label="Профиль" to="/profile" />
+      <Button as="router-link" label="Главная" to="/" replace />
+      <Button as="router-link" label="Регистрация" to="/register" replace />
+      <Button as="router-link" label="Вход" to="/login" replace />
+      <Button as="router-link" label="Профиль" to="/profile" replace />
     </nav>
   </header>
 
