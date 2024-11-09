@@ -1,3 +1,9 @@
+<script setup>
+import InputText from 'primevue/inputtext';
+
+</script>
+
+
 <template>
   <div class="main-page">
     <h2>Топики форума</h2>
@@ -10,6 +16,7 @@
 
     <h3>Создать новую категорию</h3>
     <input v-model="newCategoryName" placeholder="Название категории" />
+  
     <button @click="createCategory">Создать категорию</button>
 
     <h3>Создать новый топик</h3>

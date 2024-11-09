@@ -1,11 +1,18 @@
+<script setup>
+import Button from 'primevue/button';
+
+
+</script>
+
 <template>
+  
   <header>
     <h1>Форум ВГУ</h1>
     <nav>
-      <router-link to="/">Главная</router-link>
-      <router-link to="/register">Регистрация</router-link>
-      <router-link to="/login">Вход</router-link>
-      <router-link to="/profile">Профиль</router-link>
+      <Button as="router-link" target="_blank" rel="noopener" label="Главная" to="/" />
+      <Button as="router-link" target="_blank" rel="noopener" label="Регистрация" to="/register" />
+      <Button as="router-link" target="_blank" rel="noopener" label="Вход" to="/login" />
+      <Button as="router-link" target="_blank" rel="noopener" label="Профиль" to="/profile" />
     </nav>
   </header>
 
@@ -15,6 +22,7 @@
 </template>
 
 <script>
+
 export default {
   name: 'App',
 };
@@ -30,5 +38,6 @@ nav {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  width: 100%;
 }
 </style>
