@@ -29,9 +29,10 @@ export default {
 
 <style scoped>
 header {
-  background-color: #42b983;
+  background-color: #6208b1a0;
   color: white;
   padding: 20px;
+  width: 100%;
 }
 nav {
   display: flex;

@@ -15,6 +15,7 @@
 
     <h3>Создать новую категорию</h3>
     <input v-model="newCategoryName" placeholder="Название категории" />
+    
   
     <button @click="createCategory">Создать категорию</button>
 

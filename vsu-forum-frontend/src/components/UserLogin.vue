@@ -1,14 +1,21 @@
+
+  <script setup>
+  
+import Button from 'primevue/button';
+
+
+import InputText from 'primevue/inputtext';
+    </script>
+
 <template>
   <div class="login">
-    <h2>Вход</h2>
-    <form @submit.prevent="login">
-      <label for="username">Логин:</label>
-      <input id="username" v-model="username" required />
+    
+    <form @submit.prevent="login" class="form-login">
+     <h2>Вход в аккаунт</h2>
+    <InputText v-model="username" id="username" placeholder="Username" required style="margin-bottom: 1%; width: 15%;"/>
 
-      <label for="password">Пароль:</label>
-      <input id="password" type="password" v-model="password" required />
-
-      <button type="submit">Войти</button>
+      <InputText v-model="password" type="password" placeholder="Password" id="password" required style="margin-bottom: 1%; width: 15%;"/>
+      <Button type="submit" class="buttom">Войти</button>
     </form>
   </div>
 </template>
@@ -49,5 +56,15 @@ export default {
 </script>
 
 <style scoped>
-/* Добавьте стили, если нужно */
+.buttom{
+  width: 10%;
+}
+.form-login{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5%;
+ 
+  
+}
 </style>
