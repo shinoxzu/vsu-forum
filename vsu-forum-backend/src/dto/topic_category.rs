@@ -9,7 +9,6 @@ pub struct TopicCategoryDTO {
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct CreateTopicCategoryDTO {
-    pub id: i64,
-    #[validate(length(min = 6, max = 30))]
+    #[validate(length(min = 2, max = 30))]
     pub name: String,
 }
