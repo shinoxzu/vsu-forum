@@ -10,7 +10,7 @@ const routes = [
   { path: '/register', component: UserRegister, name: 'Register' },
   { path: '/login', component: UserLogin, name: 'Login' },
   { path: '/profile', component: UserProfile, name: 'Profile' },
-  { path: '/topics/:id', component: TopicPage, props: true },
+  { path: '/topics/:id', component: TopicPage, name: 'Topic', props: true },
 ];
 
 const router = createRouter({

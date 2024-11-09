@@ -42,6 +42,7 @@ export default {
         if (response.ok) {
           topics.value = await response.json();
         } else {
+          topics.value = [];
           console.error("Ошибка при загрузке топиков");
         }
       } catch (error) {
@@ -72,6 +73,7 @@ export default {
           console.error("Токен не найден, авторизация не выполнена.");
           return;
         }
+        
         await fetch('http://localhost:3000/topics-categories', {
           method: 'POST',
           headers: { 
