@@ -1,3 +1,4 @@
+pub mod bookmark;
 pub mod claims;
 pub mod common;
 pub mod error;
