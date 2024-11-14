@@ -1,7 +1,7 @@
 create table users (
     id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     login text NOT NULL UNIQUE,
-    password_hash BYTEA NOT NULL 
+    password_hash BYTEA NOT NULL
 );
 
 create table topics_categories (
@@ -22,7 +22,7 @@ create table posts (
     author_id BIGINT NOT NULL references users(id),
     text text NOT NULL
 );
-    
+
 create table reports (
     id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     author_id BIGINT NOT NULL references users(id),
@@ -37,14 +37,14 @@ create table bookmarks (
 );
 
 create table attachments (
-    message_id BIGINT NOT NULL references posts(id),
+    post_id BIGINT NOT NULL references posts(id),
     link TEXT NOT NULL,
-    PRIMARY KEY(message_id, link)
+    PRIMARY KEY(post_id, link)
 );
 
 create table reactions (
-    message_id BIGINT NOT NULL references posts(id),
+    post_id BIGINT NOT NULL references posts(id),
     author_id BIGINT NOT NULL references users(id),
     reaction TEXT NOT NULL,
-    PRIMARY KEY(message_id, author_id, reaction)
+    PRIMARY KEY(post_id, author_id, reaction)
 );

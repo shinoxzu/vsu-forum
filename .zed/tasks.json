@@ -9,5 +9,15 @@
     "reveal": "always",
     "hide": "never",
     "shell": "system"
+  },
+  {
+    "label": "Run formatting",
+    "command": "cargo fmt",
+    "cwd": "$ZED_WORKTREE_ROOT/vsu-forum-backend",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false,
+    "reveal": "never",
+    "hide": "on_success",
+    "shell": "system"
   }
 ]

@@ -53,10 +53,7 @@ pub async fn get_report(
             };
             Ok((StatusCode::OK, Json(report_dto)))
         }
-        None => Err(ApiError::OtherError(
-            StatusCode::NOT_FOUND,
-            "report not found".to_string(),
-        )),
+        None => Err(ApiError::NotFound("report not found".to_string())),
     }
 }
 

@@ -3,9 +3,8 @@ use axum::{
     http::StatusCode,
     Extension, Json,
 };
-use serde::Deserialize;
 
-use crate::dto::post::{CreatePostDTO, PostDTO};
+use crate::dto::post::{CreatePostDTO, GetPostsDTO, PostDTO};
 use crate::{
     dto::{claims::Claims, common::ObjectCreatedDTO},
     errors::ApiError,
@@ -14,13 +13,8 @@ use crate::{
     state::ApplicationState,
 };
 
-#[derive(Deserialize)]
-pub struct GetPostsQueryParams {
-    pub topic_id: Option<i64>,
-}
-
 pub async fn get_posts(
-    Query(query): Query<GetPostsQueryParams>,
+    Query(query): Query<GetPostsDTO>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<Vec<PostDTO>>), ApiError> {
     let posts = match query.topic_id {
@@ -67,10 +61,7 @@ pub async fn get_post(
             };
             Ok((StatusCode::OK, Json(post_dto)))
         }
-        None => Err(ApiError::OtherError(
-            StatusCode::NOT_FOUND,
-            "post not found".to_string(),
-        )),
+        None => Err(ApiError::NotFound("post not found".to_string())),
     }
 }
 

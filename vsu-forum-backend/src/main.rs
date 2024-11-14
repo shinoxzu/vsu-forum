@@ -11,7 +11,7 @@ use std::{env::var, path::Path, str::FromStr};
 
 use anyhow::Context;
 use axum::{
-    routing::{get, post},
+    routing::{delete, get, post},
     Router,
 };
 use env_logger::{Builder, Target};
@@ -23,6 +23,7 @@ use crate::handlers::posts::{create_post, get_post, get_posts};
 use crate::handlers::reports::{create_report, get_report, get_reports};
 use handlers::{
     bookmarks::{create_bookmark, get_bookmarks},
+    reactions::{add_reaction, get_reactions, remove_reaction},
     topics::{create_topic, get_topic, get_topics},
     topics_categories::{create_topic_category, get_topic_categories, get_topic_category},
     users::{get_me, get_user, login_user, register_user},
@@ -71,6 +72,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/topics-categories/:id", get(get_topic_category))
         .route("/posts", get(get_posts))
         .route("/posts/:id", get(get_post))
+        .route("/posts/:post_id/reactions", get(get_reactions))
         .route("/reports", get(get_reports))
         .route("/reports/:id", get(get_report));
 
@@ -82,6 +84,11 @@ async fn main() -> anyhow::Result<()> {
         .route("/topics-categories", post(create_topic_category))
         .route("/posts", post(create_post))
         .route("/reports", post(create_report))
+        .route("/posts/:post_id/reactions/:reaction", post(add_reaction))
+        .route(
+            "/posts/:post_id/reactions/:reaction",
+            delete(remove_reaction),
+        )
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),
             middlewares::auth::auth_middleware,

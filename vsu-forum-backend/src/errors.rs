@@ -5,6 +5,7 @@ use crate::dto::error::ErrorDTO;
 pub enum ApiError {
     InternalServerError,
     BadRequest(String),
+    NotFound(String),
     OtherError(StatusCode, String),
 }
 
@@ -18,6 +19,7 @@ impl IntoResponse for ApiError {
                 }),
             ),
             ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, Json(ErrorDTO { err: msg })),
+            ApiError::NotFound(msg) => (StatusCode::NOT_FOUND, Json(ErrorDTO { err: msg })),
             ApiError::OtherError(code, msg) => (code, Json(ErrorDTO { err: msg })),
         }
         .into_response()

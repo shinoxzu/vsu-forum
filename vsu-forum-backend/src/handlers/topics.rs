@@ -58,10 +58,7 @@ pub async fn get_topic(
             };
             Ok((StatusCode::OK, Json(topic_dto)))
         }
-        None => Err(ApiError::OtherError(
-            StatusCode::NOT_FOUND,
-            "topic not found".to_string(),
-        )),
+        None => Err(ApiError::NotFound("topic not found".to_string())),
     }
 }
 

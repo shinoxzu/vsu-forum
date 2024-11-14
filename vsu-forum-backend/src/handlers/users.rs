@@ -122,10 +122,7 @@ pub async fn get_user(
                 login: user.login,
             }),
         )),
-        None => Err(ApiError::OtherError(
-            StatusCode::NOT_FOUND,
-            "user not found".to_string(),
-        )),
+        None => Err(ApiError::NotFound("user not found".to_string())),
     }
 }
 
@@ -146,9 +143,6 @@ pub async fn get_me(
                 login: user.login,
             }),
         )),
-        None => Err(ApiError::OtherError(
-            StatusCode::NOT_FOUND,
-            "user not found".to_string(),
-        )),
+        None => Err(ApiError::NotFound("user not found".to_string())),
     }
 }

@@ -53,10 +53,7 @@ pub async fn get_topic_category(
             };
             Ok((StatusCode::OK, Json(topic_category_dto)))
         }
-        None => Err(ApiError::OtherError(
-            StatusCode::NOT_FOUND,
-            "topic not found".to_string(),
-        )),
+        None => Err(ApiError::NotFound("topic not found".to_string())),
     }
 }
 
