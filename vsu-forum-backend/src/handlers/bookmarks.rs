@@ -1,17 +1,9 @@
-use axum::{
-    extract::{Path, Query, State},
-    http::StatusCode,
-    Extension, Json,
-};
-use serde::Deserialize;
+use axum::{extract::State, http::StatusCode, Extension, Json};
 
 use crate::dto::bookmark::{BookmarkDTO, CreateBookmarkDTO};
+use crate::models::Bookmark;
 use crate::{
-    dto::{claims::Claims, common::ObjectCreatedDTO},
-    errors::ApiError,
-    extractors::ValidatedJson,
-    models::Post,
-    state::ApplicationState,
+    dto::claims::Claims, errors::ApiError, extractors::ValidatedJson, state::ApplicationState,
 };
 
 pub async fn get_bookmarks(
@@ -19,7 +11,7 @@ pub async fn get_bookmarks(
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<Vec<BookmarkDTO>>), ApiError> {
     let bookmarks = sqlx::query_as!(
-        Post,
+        Bookmark,
         "select * from bookmarks where user_id = $1",
         claims.user_id
     )
@@ -34,20 +26,25 @@ pub async fn get_bookmarks(
 
     Ok((StatusCode::OK, Json(bookmarks)))
 }
+
 pub async fn create_bookmark(
     State(state): State<ApplicationState>,
     Extension(claims): Extension<Claims>,
-
     ValidatedJson(create_bookmark_dto): ValidatedJson<CreateBookmarkDTO>,
-) -> Result<(StatusCode, Json<ObjectCreatedDTO>), ApiError> {
-    let result = sqlx::query_scalar!(
-        "insert into bookmarks(user_id, topic_id) values ($1, $2) returning id",
+) -> Result<(StatusCode, Json<BookmarkDTO>), ApiError> {
+    sqlx::query!(
+        "insert into bookmarks(user_id, topic_id) values ($1, $2)",
         claims.user_id,
-        create_bookmarks_dto.topic_id,
+        create_bookmark_dto.topic_id,
     )
     .fetch_one(&state.db_pool)
     .await
     .map_err(|_| ApiError::InternalServerError)?;
 
-    Result::Ok((StatusCode::CREATED, Json(ObjectCreatedDTO { id: result })))
+    Result::Ok((
+        StatusCode::CREATED,
+        Json(BookmarkDTO {
+            topic_id: create_bookmark_dto.topic_id,
+        }),
+    ))
 }

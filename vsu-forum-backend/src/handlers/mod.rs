@@ -1,4 +1,4 @@
-mod bookmarks;
+pub mod bookmarks;
 pub mod posts;
 pub mod reports;
 pub mod topics;

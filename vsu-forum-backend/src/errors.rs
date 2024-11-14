@@ -17,10 +17,7 @@ impl IntoResponse for ApiError {
                     err: "sorry, try again later".to_string(),
                 }),
             ),
-            ApiError::BadRequest(msg) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorDTO { err: msg }),
-            ),
+            ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, Json(ErrorDTO { err: msg })),
             ApiError::OtherError(code, msg) => (code, Json(ErrorDTO { err: msg })),
         }
         .into_response()

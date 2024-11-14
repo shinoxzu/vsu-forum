@@ -22,6 +22,7 @@ use tower_http::cors::CorsLayer;
 use crate::handlers::posts::{create_post, get_post, get_posts};
 use crate::handlers::reports::{create_report, get_report, get_reports};
 use handlers::{
+    bookmarks::{create_bookmark, get_bookmarks},
     topics::{create_topic, get_topic, get_topics},
     topics_categories::{create_topic_category, get_topic_categories, get_topic_category},
     users::{get_me, get_user, login_user, register_user},
@@ -75,6 +76,8 @@ async fn main() -> anyhow::Result<()> {
 
     let secure_router = Router::new()
         .route("/users/me", get(get_me))
+        .route("/bookmarks", post(create_bookmark))
+        .route("/bookmarks", get(get_bookmarks))
         .route("/topics", post(create_topic))
         .route("/topics-categories", post(create_topic_category))
         .route("/posts", post(create_post))

@@ -1,9 +1,11 @@
+pub mod bookmark;
 pub mod post;
 pub mod report;
 pub mod topic;
 pub mod topic_caregory;
 pub mod user;
 
+pub use bookmark::Bookmark;
 pub use post::Post;
 pub use report::Report;
 pub use topic::Topic;
