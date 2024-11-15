@@ -23,12 +23,6 @@ import Button from "primevue/button";
     </main>
 </template>
 
-<script>
-export default {
-    name: "App",
-};
-</script>
-
 <style scoped>
 header {
     background-color: #6208b1a0;

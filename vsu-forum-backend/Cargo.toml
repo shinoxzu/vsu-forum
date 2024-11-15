@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4" }
-thiserror = { version = "1.0" }
+thiserror = { version = "2.0" }
 async-trait = { version = "0.1" }
 validator = { version = "0.18", features = ["derive"] }
 jsonwebtoken = "9"
