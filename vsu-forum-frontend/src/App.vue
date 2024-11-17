@@ -39,6 +39,7 @@ header {
     padding-left: 20px;
     padding-right: 20px;
     gap: 20px;
+    background-color: #1a1818;
 }
 
 .title {

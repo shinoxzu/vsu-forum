@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
-
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
 const username = ref("");
 const password = ref("");
 
@@ -31,15 +32,38 @@ async function register() {
 
 <template>
     <div class="register">
-        <h2>Регистрация</h2>
-        <form @submit.prevent="register">
-            <label for="username">Логин:</label>
-            <input id="username" v-model="username" required />
+        <form @submit.prevent="register" class="register_form">
+            <h2>Регистрация</h2>
+            <InputText
+                v-model="username"
+                id="username"
+                placeholder="Username"
+                required
+                style="margin-bottom: 1%; width: 15%"
+            />
 
-            <label for="password">Пароль:</label>
-            <input id="password" type="password" v-model="password" required />
-
-            <button type="submit">Зарегистрироваться</button>
+            <InputText
+                v-model="password"
+                type="password"
+                placeholder="Password"
+                id="password"
+                required
+                style="margin-bottom: 1%; width: 15%"
+            />
+            <Button type="submit">Зарегистрироваться</Button>
         </form>
     </div>
 </template>
+
+
+    <style scoped>
+    .buttom {
+        width: 10%;
+    }
+    .register_form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 5%;
+    }
+    </style>
