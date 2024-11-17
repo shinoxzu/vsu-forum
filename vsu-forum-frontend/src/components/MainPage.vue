@@ -1,4 +1,6 @@
 <script setup>
+import AutoComplete from 'primevue/autocomplete';
+import Button from 'primevue/button';
 import { ref, onMounted } from "vue";
 
 const topics = ref([]);
@@ -66,6 +68,7 @@ async function createTopic() {
             console.error("Токен не найден, авторизация не выполнена.");
             return;
         }
+
         await fetch("http://localhost:3000/topics", {
             method: "POST",
             headers: {
@@ -103,9 +106,42 @@ onMounted(() => {
         <p v-else>Топики пока не добавлены.</p>
 
         <h3>Создать новую категорию</h3>
-        <input v-model="newCategoryName" placeholder="Название категории" />
-
-        <button @click="createCategory">Создать категорию</button>
+        <AutoComplete
+            v-model="newCategoryName"
+            optionLabel="name"
+            :suggestions="categories"
+            @complete="fetchCategories"
+            placeholder="Название категории"
+        >
+            <template #option="slotProps">
+                <div class="flex items-center">
+                    <img
+                        :alt="slotProps.option.name"
+                        src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
+                        :class="`flag flag-${slotProps.option.code.toLowerCase()} mr-2`"
+                        style="width: 18px"
+                    />
+                    <div>{{ slotProps.option.name }}</div>
+                </div>
+            </template>
+            <template #header>
+                <div class="font-medium px-3 py-2">Доступные категории</div>
+            </template>
+            <template #footer>
+                <div class="px-3 py-3">
+                    <Button
+                        @click="createCategory"
+                        type="button"
+                        label="Создать категорию"
+                        fluid
+                        severity="secondary"
+                        text
+                        size="small"
+                        icon="pi pi-plus"
+                    />
+                </div>
+            </template>
+        </AutoComplete>
 
         <h3>Создать новый топик</h3>
         <select v-model="selectedCategory">

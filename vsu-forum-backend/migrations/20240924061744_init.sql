@@ -36,15 +36,13 @@ create table bookmarks (
     PRIMARY KEY(user_id, topic_id)
 );
 
-create table attachments (
-    post_id BIGINT NOT NULL references posts(id),
-    link TEXT NOT NULL,
-    PRIMARY KEY(post_id, link)
-);
-
 create table reactions (
     post_id BIGINT NOT NULL references posts(id),
     author_id BIGINT NOT NULL references users(id),
     reaction TEXT NOT NULL,
     PRIMARY KEY(post_id, author_id, reaction)
+);
+
+create table available_reactions (
+    reaction TEXT NOT NULL PRIMARY KEY 
 );

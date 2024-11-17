@@ -1,10 +1,14 @@
 <script setup>
+import "primeicons/primeicons.css";
 import Button from "primevue/button";
+import InputText from 'primevue/inputtext';
 </script>
 
 <template>
     <header>
-        <h1>Форум ВГУ</h1>
+        <div class="title">
+            <h1>Форум ВГУ</h1>
+        </div>
         <nav>
             <Button as="router-link" label="Главная" to="/" replace />
             <Button
@@ -16,6 +20,10 @@ import Button from "primevue/button";
             <Button as="router-link" label="Вход" to="/login" replace />
             <Button as="router-link" label="Профиль" to="/profile" replace />
         </nav>
+        <div class="search-field">
+            <InputText type="text" v-model="value" placeholder="Запрос..."/>
+            <Button icon="pi pi-search" rounded aria-label="Search" />
+        </div>
     </header>
 
     <main>
@@ -25,15 +33,33 @@ import Button from "primevue/button";
 
 <style scoped>
 header {
-    background-color: #6208b1a0;
-    color: white;
-    padding: 20px;
-    width: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    gap: 20px;
 }
+
+.title {
+    width: 20%;
+}
+
 nav {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 20px;
+    align-items: center;
+    justify-content: start;
     width: 100%;
+}
+
+.search-field {
+    margin-left: auto;
+    display: flex;
+    gap: 10px
+}
+
+a { 
+    text-decoration: none;
 }
 </style>
