@@ -4,17 +4,17 @@ use validator::Validate;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ReactionDTO {
     pub author_id: i64,
-    pub reaction: String,
+    pub reaction_id: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct AddReactionDTO {
     pub post_id: i64,
-    pub reaction: String,
+    pub reaction_id: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct RemoveReactionDTO {
     pub post_id: i64,
-    pub reaction: String,
+    pub reaction_id: i64,
 }

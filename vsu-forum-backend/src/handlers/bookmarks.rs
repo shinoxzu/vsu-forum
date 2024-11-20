@@ -1,9 +1,18 @@
-use axum::{extract::State, http::StatusCode, Extension, Json};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    Extension, Json,
+};
 
-use crate::dto::bookmark::{BookmarkDTO, CreateBookmarkDTO};
-use crate::models::Bookmark;
 use crate::{
-    dto::claims::Claims, errors::ApiError, extractors::ValidatedJson, state::ApplicationState,
+    dto::{
+        bookmark::{BookmarkDTO, CreateBookmarkDTO},
+        claims::Claims,
+    },
+    errors::ApiError,
+    extractors::ValidatedJson,
+    models::Bookmark,
+    state::ApplicationState,
 };
 
 pub async fn get_bookmarks(
@@ -47,4 +56,28 @@ pub async fn create_bookmark(
             topic_id: create_bookmark_dto.topic_id,
         }),
     ))
+}
+
+pub async fn remove_bookmark(
+    Path(topic_id): Path<i64>,
+    State(state): State<ApplicationState>,
+    Extension(claims): Extension<Claims>,
+) -> Result<StatusCode, ApiError> {
+    let rows_affected = sqlx::query!(
+        "delete from bookmarks where user_id = $1 and topic_id = $2",
+        claims.user_id,
+        topic_id
+    )
+    .execute(&state.db_pool)
+    .await
+    .map_err(|_| ApiError::InternalServerError)?
+    .rows_affected();
+
+    if rows_affected > 0 {
+        Result::Ok(StatusCode::OK)
+    } else {
+        Err(ApiError::NotFound(
+            "you did not bookmark this topic".to_string(),
+        ))
+    }
 }

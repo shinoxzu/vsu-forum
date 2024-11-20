@@ -15,3 +15,10 @@ pub struct CreateTopicDTO {
     #[validate(length(min = 6, max = 30))]
     pub name: String,
 }
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct UpdateTopicDTO {
+    pub category_id: Option<i64>,
+    #[validate(length(min = 1, max = 1000))]
+    pub name: Option<String>,
+}

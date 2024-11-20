@@ -1,10 +1,15 @@
-use axum::extract::Path;
-use axum::Json;
-use axum::{extract::State, http::StatusCode, Extension};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    Extension, Json,
+};
 
-use crate::dto::reactions::ReactionDTO;
-use crate::models::Reaction;
-use crate::{dto::claims::Claims, errors::ApiError, state::ApplicationState};
+use crate::{
+    dto::{claims::Claims, reactions::ReactionDTO},
+    errors::ApiError,
+    models::Reaction,
+    state::ApplicationState,
+};
 
 pub async fn get_reactions(
     Path(post_id): Path<i64>,
@@ -21,7 +26,7 @@ pub async fn get_reactions(
     .iter()
     .map(|r| ReactionDTO {
         author_id: r.author_id,
-        reaction: r.reaction.clone(),
+        reaction_id: r.reaction_id,
     })
     .collect();
 
@@ -30,15 +35,15 @@ pub async fn get_reactions(
 
 pub async fn add_reaction(
     Path(post_id): Path<i64>,
-    Path(reaction): Path<String>,
+    Path(reaction_id): Path<i64>,
     State(state): State<ApplicationState>,
     Extension(claims): Extension<Claims>,
 ) -> Result<StatusCode, ApiError> {
     sqlx::query!(
-        "insert into reactions(post_id, author_id, reaction) values ($1, $2, $3)",
+        "insert into reactions(post_id, author_id, reaction_id) values ($1, $2, $3)",
         post_id,
         claims.user_id,
-        reaction,
+        reaction_id,
     )
     .fetch_one(&state.db_pool)
     .await
@@ -49,15 +54,15 @@ pub async fn add_reaction(
 
 pub async fn remove_reaction(
     Path(post_id): Path<i64>,
-    Path(reaction): Path<String>,
+    Path(reaction_id): Path<i64>,
     State(state): State<ApplicationState>,
     Extension(claims): Extension<Claims>,
 ) -> Result<StatusCode, ApiError> {
     let rows_affected = sqlx::query!(
-        "delete from reactions where post_id = $1 and author_id = $2 and reaction = $3",
+        "delete from reactions where post_id = $1 and author_id = $2 and reaction_id = $3",
         post_id,
         claims.user_id,
-        reaction,
+        reaction_id,
     )
     .execute(&state.db_pool)
     .await

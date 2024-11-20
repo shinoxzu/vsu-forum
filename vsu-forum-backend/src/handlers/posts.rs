@@ -4,9 +4,12 @@ use axum::{
     Extension, Json,
 };
 
-use crate::dto::post::{CreatePostDTO, GetPostsDTO, PostDTO};
 use crate::{
-    dto::{claims::Claims, common::ObjectCreatedDTO},
+    dto::{
+        claims::Claims,
+        common::ObjectCreatedDTO,
+        post::{CreatePostDTO, GetPostsDTO, PostDTO, UpdatePostDTO},
+    },
     errors::ApiError,
     extractors::ValidatedJson,
     models::Post,
@@ -81,4 +84,47 @@ pub async fn create_post(
     .map_err(|_| ApiError::InternalServerError)?;
 
     Result::Ok((StatusCode::CREATED, Json(ObjectCreatedDTO { id: result })))
+}
+
+pub async fn remove_post(
+    Path(post_id): Path<i64>,
+    State(state): State<ApplicationState>,
+) -> Result<StatusCode, ApiError> {
+    let rows_affected = sqlx::query!("delete from posts where id = $1", post_id)
+        .execute(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?
+        .rows_affected();
+
+    if rows_affected > 0 {
+        Result::Ok(StatusCode::OK)
+    } else {
+        Err(ApiError::NotFound(
+            "post with such id not found".to_string(),
+        ))
+    }
+}
+
+pub async fn patch_post(
+    Path(post_id): Path<i64>,
+    State(state): State<ApplicationState>,
+    ValidatedJson(update_post_dto): ValidatedJson<UpdatePostDTO>,
+) -> Result<StatusCode, ApiError> {
+    let rows_affected = if let Some(text) = update_post_dto.text {
+        sqlx::query!("update posts set text = $1 where id = $2", text, post_id)
+            .execute(&state.db_pool)
+            .await
+            .map_err(|_| ApiError::InternalServerError)?
+            .rows_affected()
+    } else {
+        0
+    };
+
+    if rows_affected > 0 {
+        Result::Ok(StatusCode::OK)
+    } else {
+        Err(ApiError::NotFound(
+            "post with such id not found".to_string(),
+        ))
+    }
 }

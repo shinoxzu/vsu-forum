@@ -20,3 +20,9 @@ pub struct CreatePostDTO {
 pub struct GetPostsDTO {
     pub topic_id: Option<i64>,
 }
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct UpdatePostDTO {
+    #[validate(length(min = 1, max = 1000))]
+    pub text: Option<String>,
+}

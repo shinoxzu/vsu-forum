@@ -27,6 +27,7 @@ create table reports (
     id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     author_id BIGINT NOT NULL references users(id),
     reported_user_id BIGINT NOT NULL references users(id),
+    reason text NOT NULL,
     UNIQUE(author_id, reported_user_id)
 );
 
@@ -36,13 +37,14 @@ create table bookmarks (
     PRIMARY KEY(user_id, topic_id)
 );
 
+create table available_reactions (
+    id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    reaction TEXT NOT NULL
+);
+
 create table reactions (
     post_id BIGINT NOT NULL references posts(id),
     author_id BIGINT NOT NULL references users(id),
-    reaction TEXT NOT NULL,
-    PRIMARY KEY(post_id, author_id, reaction)
-);
-
-create table available_reactions (
-    reaction TEXT NOT NULL PRIMARY KEY 
+    reaction_id BIGINT NOT NULL references available_reactions(id),
+    PRIMARY KEY(post_id, author_id, reaction_id)
 );

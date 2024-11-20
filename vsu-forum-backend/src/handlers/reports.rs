@@ -4,9 +4,12 @@ use axum::{
     Extension, Json,
 };
 
-use crate::dto::report::{CreateReportDTO, ReportDTO};
 use crate::{
-    dto::{claims::Claims, common::ObjectCreatedDTO},
+    dto::{
+        claims::Claims,
+        common::ObjectCreatedDTO,
+        report::{CreateReportDTO, ReportDTO, UpdateReportDTO},
+    },
     errors::ApiError,
     extractors::ValidatedJson,
     models::Report,
@@ -25,6 +28,7 @@ pub async fn get_reports(
             id: r.id,
             author_id: r.author_id,
             reported_user_id: r.reported_user_id,
+            reason: r.reason.clone(),
         })
         .collect();
 
@@ -50,6 +54,7 @@ pub async fn get_report(
                 id: report.id,
                 author_id: report.author_id,
                 reported_user_id: report.reported_user_id,
+                reason: report.reason,
             };
             Ok((StatusCode::OK, Json(report_dto)))
         }
@@ -72,4 +77,51 @@ pub async fn create_report(
     .map_err(|_| ApiError::InternalServerError)?;
 
     Result::Ok((StatusCode::CREATED, Json(ObjectCreatedDTO { id: result })))
+}
+
+pub async fn remove_report(
+    Path(report_id): Path<i64>,
+    State(state): State<ApplicationState>,
+) -> Result<StatusCode, ApiError> {
+    let rows_affected = sqlx::query!("delete from reports where id = $1", report_id)
+        .execute(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?
+        .rows_affected();
+
+    if rows_affected > 0 {
+        Result::Ok(StatusCode::OK)
+    } else {
+        Err(ApiError::NotFound(
+            "report with such id not found".to_string(),
+        ))
+    }
+}
+
+pub async fn patch_report(
+    Path(report_id): Path<i64>,
+    State(state): State<ApplicationState>,
+    ValidatedJson(update_report_dto): ValidatedJson<UpdateReportDTO>,
+) -> Result<StatusCode, ApiError> {
+    let rows_affected = if let Some(reason) = update_report_dto.reason {
+        sqlx::query!(
+            "update reports set reason = $1 where id = $2",
+            reason,
+            report_id
+        )
+        .execute(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?
+        .rows_affected()
+    } else {
+        0
+    };
+
+    if rows_affected > 0 {
+        Result::Ok(StatusCode::OK)
+    } else {
+        Err(ApiError::NotFound(
+            "report with such id not found".to_string(),
+        ))
+    }
 }
