@@ -5,12 +5,8 @@ use axum::{
 };
 
 use crate::{
-    dto::{
-        bookmark::{BookmarkDTO, CreateBookmarkDTO},
-        claims::Claims,
-    },
+    dto::{bookmark::BookmarkDTO, claims::Claims},
     errors::ApiError,
-    extractors::ValidatedJson,
     models::Bookmark,
     state::ApplicationState,
 };
@@ -37,25 +33,20 @@ pub async fn get_bookmarks(
 }
 
 pub async fn create_bookmark(
+    Path(topic_id): Path<i64>,
     State(state): State<ApplicationState>,
     Extension(claims): Extension<Claims>,
-    ValidatedJson(create_bookmark_dto): ValidatedJson<CreateBookmarkDTO>,
 ) -> Result<(StatusCode, Json<BookmarkDTO>), ApiError> {
     sqlx::query!(
         "insert into bookmarks(user_id, topic_id) values ($1, $2)",
         claims.user_id,
-        create_bookmark_dto.topic_id,
+        topic_id,
     )
     .fetch_one(&state.db_pool)
     .await
     .map_err(|_| ApiError::InternalServerError)?;
 
-    Result::Ok((
-        StatusCode::CREATED,
-        Json(BookmarkDTO {
-            topic_id: create_bookmark_dto.topic_id,
-        }),
-    ))
+    Result::Ok((StatusCode::CREATED, Json(BookmarkDTO { topic_id })))
 }
 
 pub async fn remove_bookmark(

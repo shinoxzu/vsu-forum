@@ -46,10 +46,10 @@ pub async fn get_posts(
 }
 
 pub async fn get_post(
-    Path(post_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<PostDTO>), ApiError> {
-    let post = sqlx::query_as!(Post, "select * from posts where id = $1 limit 1", post_id)
+    let post = sqlx::query_as!(Post, "select * from posts where id = $1 limit 1", id)
         .fetch_optional(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?;
@@ -87,10 +87,10 @@ pub async fn create_post(
 }
 
 pub async fn remove_post(
-    Path(post_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<StatusCode, ApiError> {
-    let rows_affected = sqlx::query!("delete from posts where id = $1", post_id)
+    let rows_affected = sqlx::query!("delete from posts where id = $1", id)
         .execute(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?

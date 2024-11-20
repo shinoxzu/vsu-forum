@@ -33,13 +33,13 @@ pub async fn get_topic_categories(
 }
 
 pub async fn get_topic_category(
-    Path(topic_category_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<TopicCategoryDTO>), ApiError> {
     let topic_category = sqlx::query_as!(
         TopicCategory,
         "select * from topics_categories where id = $1 limit 1",
-        topic_category_id
+        id
     )
     .fetch_optional(&state.db_pool)
     .await
@@ -73,17 +73,14 @@ pub async fn create_topic_category(
 }
 
 pub async fn remove_topic_category(
-    Path(topic_category_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<StatusCode, ApiError> {
-    let rows_affected = sqlx::query!(
-        "delete from topics_categories where id = $1",
-        topic_category_id
-    )
-    .execute(&state.db_pool)
-    .await
-    .map_err(|_| ApiError::InternalServerError)?
-    .rows_affected();
+    let rows_affected = sqlx::query!("delete from topics_categories where id = $1", id)
+        .execute(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?
+        .rows_affected();
 
     if rows_affected > 0 {
         Result::Ok(StatusCode::OK)

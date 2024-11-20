@@ -36,17 +36,13 @@ pub async fn get_reports(
 }
 
 pub async fn get_report(
-    Path(report_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<ReportDTO>), ApiError> {
-    let report = sqlx::query_as!(
-        Report,
-        "select * from reports where id = $1 limit 1",
-        report_id
-    )
-    .fetch_optional(&state.db_pool)
-    .await
-    .map_err(|_| ApiError::InternalServerError)?;
+    let report = sqlx::query_as!(Report, "select * from reports where id = $1 limit 1", id)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
 
     match report {
         Some(report) => {
@@ -80,10 +76,10 @@ pub async fn create_report(
 }
 
 pub async fn remove_report(
-    Path(report_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<StatusCode, ApiError> {
-    let rows_affected = sqlx::query!("delete from reports where id = $1", report_id)
+    let rows_affected = sqlx::query!("delete from reports where id = $1", id)
         .execute(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?

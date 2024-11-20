@@ -81,19 +81,16 @@ async fn main() -> anyhow::Result<()> {
     let secure_router = Router::new()
         .route("/users/me", get(get_me))
         .route("/topics", post(create_topic))
-        .route("/topics/:topic_id", delete(remove_topic))
+        .route("/topics/:id", delete(remove_topic))
         .route("/bookmarks", get(get_bookmarks))
         .route("/topics/:topic_id/bookmark", post(create_bookmark))
         .route("/topics/:topic_id/bookmark", delete(remove_bookmark))
         .route("/topics-categories", post(create_topic_category))
-        .route(
-            "/topics-categories/:topic_category_id",
-            delete(remove_topic_category),
-        )
+        .route("/topics-categories/:id", delete(remove_topic_category))
         .route("/posts", post(create_post))
-        .route("/posts/:post_id", delete(remove_post))
+        .route("/posts/:id", delete(remove_post))
         .route("/reports", post(create_report))
-        .route("/reports/:report_id", delete(remove_report))
+        .route("/reports/:id", delete(remove_report))
         .route("/posts/:post_id/reactions/:reaction", post(add_reaction))
         .route(
             "/posts/:post_id/reactions/:reaction",

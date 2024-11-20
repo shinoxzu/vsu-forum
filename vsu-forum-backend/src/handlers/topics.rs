@@ -36,17 +36,13 @@ pub async fn get_topics(
 }
 
 pub async fn get_topic(
-    Path(topic_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<TopicDTO>), ApiError> {
-    let topic = sqlx::query_as!(
-        Topic,
-        "select * from topics where id = $1 limit 1",
-        topic_id
-    )
-    .fetch_optional(&state.db_pool)
-    .await
-    .map_err(|_| ApiError::InternalServerError)?;
+    let topic = sqlx::query_as!(Topic, "select * from topics where id = $1 limit 1", id)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
 
     match topic {
         Some(topic) => {
@@ -81,10 +77,10 @@ pub async fn create_topic(
 }
 
 pub async fn remove_topic(
-    Path(topics_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<StatusCode, ApiError> {
-    let rows_affected = sqlx::query!("delete from topics where id = $1", topics_id)
+    let rows_affected = sqlx::query!("delete from topics where id = $1", id)
         .execute(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?

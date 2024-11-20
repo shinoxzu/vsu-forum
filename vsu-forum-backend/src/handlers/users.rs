@@ -106,10 +106,10 @@ pub async fn login_user(
 }
 
 pub async fn get_user(
-    Path(user_id): Path<i64>,
+    Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<UserDTO>), ApiError> {
-    let user = sqlx::query_as!(User, "select * from users where id = $1", user_id)
+    let user = sqlx::query_as!(User, "select * from users where id = $1", id)
         .fetch_optional(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?;
