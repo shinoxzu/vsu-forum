@@ -11,7 +11,7 @@ use std::{env::var, path::Path, str::FromStr};
 
 use anyhow::Context;
 use axum::{
-    routing::{delete, get, post},
+    routing::{delete, get, patch, post},
     Router,
 };
 use env_logger::{Builder, Target};
@@ -21,10 +21,10 @@ use tower_http::cors::CorsLayer;
 
 use handlers::{
     bookmarks::{create_bookmark, get_bookmarks, remove_bookmark},
-    posts::{create_post, get_post, get_posts, remove_post},
+    posts::{create_post, get_post, get_posts, patch_post, remove_post},
     reactions::{add_reaction, get_reactions, remove_reaction},
-    reports::{create_report, get_report, get_reports, remove_report},
-    topics::{create_topic, get_topic, get_topics, remove_topic},
+    reports::{create_report, get_report, get_reports, patch_report, remove_report},
+    topics::{create_topic, get_topic, get_topics, patch_topic, remove_topic},
     topics_categories::{
         create_topic_category, get_topic_categories, get_topic_category, remove_topic_category,
     },
@@ -89,6 +89,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/users/me", get(get_me))
         .route("/topics", post(create_topic))
         .route("/topics/:id", delete(remove_topic))
+        .route("/topics/:id", patch(patch_topic))
         .route("/bookmarks", get(get_bookmarks))
         .route("/topics/:topic_id/bookmark", post(create_bookmark))
         .route("/topics/:topic_id/bookmark", delete(remove_bookmark))
@@ -96,8 +97,10 @@ async fn main() -> anyhow::Result<()> {
         .route("/topics-categories/:id", delete(remove_topic_category))
         .route("/posts", post(create_post))
         .route("/posts/:id", delete(remove_post))
+        .route("/posts/:id", patch(patch_post))
         .route("/reports", post(create_report))
         .route("/reports/:id", delete(remove_report))
+        .route("/reports/:id", patch(patch_report))
         .route("/posts/:post_id/reactions/:reaction", post(add_reaction))
         .route(
             "/posts/:post_id/reactions/:reaction",
