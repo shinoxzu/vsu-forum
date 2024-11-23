@@ -34,7 +34,14 @@ use state::ApplicationState;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let config_path = var("CONFIG_PATH").context("cannot load config path from env variable")?;
+    let config_path = match var("CONFIG_PATH") {
+        Ok(variable) => variable,
+        Err(err) => {
+            println!("cannot parse config path from env; trying dev config (caused: {err}");
+            "config.dev.toml".to_string()
+        }
+    };
+
     let config = tools::load_config(&config_path).context("cannot load config")?;
 
     Builder::new()
