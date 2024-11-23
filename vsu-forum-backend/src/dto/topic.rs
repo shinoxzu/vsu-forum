@@ -1,8 +1,19 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+use super::{topic_category::TopicCategoryDTO, user::UserDTO};
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TopicDTO {
+    pub id: i64,
+    pub name: String,
+    pub category: TopicCategoryDTO,
+    pub creator: UserDTO,
+    pub posts_count: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ShortTopicDTO {
     pub id: i64,
     pub author_id: i64,
     pub category_id: i64,
