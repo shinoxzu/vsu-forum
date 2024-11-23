@@ -5,6 +5,7 @@ import InputText from "primevue/inputtext";
 import AutoComplete from "primevue/autocomplete";
 import Button from "primevue/button";
 import Message from "primevue/message";
+import { Dialog } from "primevue";
 
 const newTopicName = ref(null);
 const selectedTopicCategory = ref(null);
@@ -125,7 +126,7 @@ async function createTopic() {
         });
 
         if (response.ok) {
-            // redirect to new topic
+        //  redirect   
         }
         else {
             switch (response.status) {
