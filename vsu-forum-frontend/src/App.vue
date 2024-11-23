@@ -1,7 +1,7 @@
 <script setup>
 import "primeicons/primeicons.css";
 import Button from "primevue/button";
-import InputText from 'primevue/inputtext';
+import InputText from "primevue/inputtext";
 </script>
 
 <template>
@@ -10,18 +10,13 @@ import InputText from 'primevue/inputtext';
             <h1>Форум ВГУ</h1>
         </div>
         <nav>
-            <Button as="router-link" label="Главная" to="/" replace />
-            <Button
-                as="router-link"
-                label="Регистрация"
-                to="/register"
-                replace
-            />
-            <Button as="router-link" label="Вход" to="/login" replace />
-            <Button as="router-link" label="Профиль" to="/profile" replace />
+            <Button as="router-link" label="Главная" to="/" />
+            <Button as="router-link" label="Регистрация" to="/register" />
+            <Button as="router-link" label="Вход" to="/login" />
+            <Button as="router-link" label="Профиль" to="/profile" />
         </nav>
         <div class="search-field">
-            <InputText type="text" v-model="value" placeholder="Запрос..."/>
+            <InputText type="text" placeholder="Запрос..." />
             <Button icon="pi pi-search" rounded aria-label="Search" />
         </div>
     </header>
@@ -57,10 +52,14 @@ nav {
 .search-field {
     margin-left: auto;
     display: flex;
-    gap: 10px
+    gap: 10px;
 }
 
-a { 
+a {
     text-decoration: none;
+}
+
+main {
+    padding: 15px;
 }
 </style>

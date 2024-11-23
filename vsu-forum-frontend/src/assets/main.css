@@ -1,0 +1,23 @@
+.simple-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 13px;
+    min-width: 220px;
+    max-width: 30%;
+    width: 20%;
+}
+
+.center-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.errors-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}

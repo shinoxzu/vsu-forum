@@ -16,6 +16,7 @@ async function fetchProfile() {
                 Authorization: `Bearer ${token}`,
             },
         });
+        
         if (response.ok) {
             const data = await response.json();
             username.value = data.login;

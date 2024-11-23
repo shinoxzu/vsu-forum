@@ -1,6 +1,12 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { Form } from "@primevue/forms";
+import InputText from "primevue/inputtext";
+import AutoComplete from "primevue/autocomplete";
+import Button from "primevue/button";
+import Message from "primevue/message";
+import Textarea from 'primevue/textarea';
 
 const route = useRoute();
 const topic = ref({});
@@ -12,6 +18,7 @@ async function fetchTopic() {
         const response = await fetch(
             `http://localhost:3000/topics/${route.params.id}`,
         );
+
         if (response.ok) {
             topic.value = await response.json();
         } else {
@@ -27,6 +34,7 @@ async function fetchPosts() {
         const response = await fetch(
             `http://localhost:3000/posts?topic_id=${route.params.id}`,
         );
+
         if (response.ok) {
             posts.value = await response.json();
         } else {
@@ -38,13 +46,15 @@ async function fetchPosts() {
 }
 
 async function createPost() {
-    if (!newPostText.value) return; // Проверка, что текст поста не пустой
+    if (!newPostText.value) return;
+
     try {
         const token = localStorage.getItem("token");
         if (!token) {
             console.error("Токен не найден, авторизация не выполнена.");
             return;
         }
+
         const response = await fetch("http://localhost:3000/posts", {
             method: "POST",
             headers: {
@@ -56,9 +66,10 @@ async function createPost() {
                 text: newPostText.value,
             }),
         });
+
         if (response.ok) {
-            newPostText.value = ""; // Очистить текстовое поле
-            fetchPosts(); // Обновить список постов
+            newPostText.value = "";
+            fetchPosts();
         } else {
             console.error("Ошибка при создании поста");
         }
@@ -75,24 +86,27 @@ onMounted(() => {
 
 <template>
     <div class="topic-page">
-        <h2>{{ topic.name }}</h2>
-        <p>Автор ID: {{ topic.author_id }}</p>
-        <p>Категория ID: {{ topic.category_id }}</p>
+        <div class="topic-info">
+            <h2>{{ topic.name }}</h2>
+            <p>Автор ID: {{ topic.author_id }}</p>
+            <p>Категория ID: {{ topic.category_id }}</p>
+        </div>
 
-        <h3>Посты в этом топике</h3>
-        <ul v-if="posts.length">
-            <li v-for="post in posts" :key="post.id">
+        <div class="posts-container" v-if="posts.length">
+            <div class="post" v-for="post in posts" :key="post.id">
                 {{ post.text }}
-            </li>
-        </ul>
-        <p v-else>Постов пока нет.</p>
-
-        <h3>Создать новый пост</h3>
-        <textarea
-            v-model="newPostText"
-            placeholder="Введите текст поста"
-        ></textarea>
-        <button @click="createPost">Добавить пост</button>
+            </div>
+        </div>
+        
+        <div class="send-message-container">
+            <Form @submit="createPost" class="send-post-form">
+                <Textarea placeholder="Текст поста" v-model="newPostText" autoResize rows="5" />
+                <Button
+                    type="submit"
+                    label="Отправить"
+                />
+            </Form>
+        </div>
     </div>
 </template>
 
@@ -101,15 +115,47 @@ onMounted(() => {
     padding: 20px;
 }
 
-textarea {
-    display: block;
-    width: 100%;
-    height: 100px;
-    margin-top: 10px;
+.topic-info {
+    background-color: #222222;
+    border-radius: 7px;
+    padding-left: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     margin-bottom: 10px;
 }
 
-button {
-    padding: 10px 20px;
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 13px;
+    min-width: 220px;
+    max-width: 30%;
+    width: 20%;
+}
+
+.post {
+    background-color: #222222;
+    border-radius: 7px;
+    padding: 10px;
+}
+
+.send-post-form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 13px;
+    min-width: 220px;
+    max-width: 30%;
+    width: 20%;
+}
+
+.send-message-container {
+    background-color: #222222;
+    border-radius: 7px;
+    padding-left: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 10px;
 }
 </style>

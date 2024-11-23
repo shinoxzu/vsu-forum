@@ -1,0 +1,1 @@
+CONFIG_PATH=config.dev.toml cargo run
