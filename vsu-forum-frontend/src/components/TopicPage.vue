@@ -1,19 +1,36 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Form } from "@primevue/forms";
 import InputText from "primevue/inputtext";
-import AutoComplete from "primevue/autocomplete";
 import Button from "primevue/button";
-import Message from "primevue/message";
+import { Select } from "primevue";
+import {Dialog} from "primevue";
 import Textarea from 'primevue/textarea';
 
 const route = useRoute();
 const topic = ref({});
 const posts = ref([]);
 const newPostText = ref("");
+const err = ref(false)
+const newTopicName = ref(topic.value?.name)
+const selectedCategory = ref(null)
+const categories = ref([])
+const edited = ref(0)
+
+watch([topic, selectedCategory], () => {
+    edited.value++
+}, {deep: true} )
+
+
+onMounted(() => {
+    fetchTopic();
+    fetchPosts();
+    fetchCategories()
+});
 
 async function fetchTopic() {
+    edited.value++
     try {
         const response = await fetch(
             `http://localhost:3000/topics/${route.params.id}`,
@@ -21,6 +38,7 @@ async function fetchTopic() {
 
         if (response.ok) {
             topic.value = await response.json();
+
         } else {
             console.error("Ошибка при загрузке топика");
         }
@@ -29,7 +47,7 @@ async function fetchTopic() {
     }
 }
 
-async function fetchPosts() {
+const  fetchPosts = async () => {
     try {
         const response = await fetch(
             `http://localhost:3000/posts?topic_id=${route.params.id}`,
@@ -42,8 +60,30 @@ async function fetchPosts() {
         }
     } catch (error) {
         console.error("Ошибка сети:", error);
+        err.value = true
     }
 }
+
+const updateTopic = async () => {
+    console.log(newTopicName.value)
+    console.log(selectedCategory.value)
+    const token = localStorage.getItem("token");
+    const resp = await fetch("http://localhost:3000/topics/" + topic.value.id, {
+        method: "PUT",
+        headers: {
+            "Authorization" : `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({category_id: selectedCategory.value.id, name: topic.value.name})
+    })
+    if (!resp.ok) {
+        console.error(resp.status)
+        err.value = true
+    } else {
+        edited.value = 3
+    }
+}
+ 
 
 async function createPost() {
     if (!newPostText.value) return;
@@ -78,20 +118,35 @@ async function createPost() {
     }
 }
 
-onMounted(() => {
-    fetchTopic();
-    fetchPosts();
-});
+const fetchCategories = async () => {
+    edited.value++
+    try {
+        const response = await fetch("http://localhost:3000/topics-categories");
+        if (!response.ok) {
+            console.error(response.status, await response.json())
+        } else {
+            categories.value = await response.json();
+            selectedCategory.value = categories.value.find(c => topic.value.category_id == c.id)
+            console.log(categories.value)
+        }
+
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+
 </script>
 
 <template>
     <div class="topic-page">
         <div class="topic-info">
-            <h2>{{ topic.name }}</h2>
+            <InputText type="text" v-model="topic.name" ></InputText>
             <p>Автор ID: {{ topic.author_id }}</p>
-            <p>Категория ID: {{ topic.category_id }}</p>
+            <Select placeholder="Категория:" :options="categories" optionLabel="name" v-model="selectedCategory" style="width: 160px;"/>
+            <Button v-show="edited > 3" @click="updateTopic">Обновить</Button>
         </div>
-
+        
         <div class="posts-container" v-if="posts.length">
             <div class="post" v-for="post in posts" :key="post.id">
                 {{ post.text }}
@@ -108,6 +163,7 @@ onMounted(() => {
             </Form>
         </div>
     </div>
+    <Dialog v-model:visible="err" closable position="top"><p>Упс! Что-то пошло не так</p></Dialog>
 </template>
 
 <style scoped>
