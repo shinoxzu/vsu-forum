@@ -9,10 +9,10 @@ use crate::{
         claims::Claims,
         common::ObjectCreatedDTO,
         post::{CreatePostDTO, GetPostsDTO, PostDTO, UpdatePostDTO},
+        user::UserDTO,
     },
     errors::ApiError,
     extractors::ValidatedJson,
-    models::Post,
     state::ApplicationState,
 };
 
@@ -20,25 +20,35 @@ pub async fn get_posts(
     Query(query): Query<GetPostsDTO>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<Vec<PostDTO>>), ApiError> {
-    let posts = match query.topic_id {
-        Some(topic_id) => {
-            sqlx::query_as!(Post, "select * from posts where topic_id = $1", topic_id)
-                .fetch_all(&state.db_pool)
-                .await
-        }
-        None => {
-            sqlx::query_as!(Post, "select * from posts")
-                .fetch_all(&state.db_pool)
-                .await
-        }
-    }
+    let posts = sqlx::query!(
+        "
+        SELECT
+            p.id AS post_id,
+            p.topic_id AS topic_id,
+            p.text AS post_text,
+            u.id AS sender_id,
+            u.login AS sender_login
+        FROM
+            posts p
+        JOIN
+            users u ON p.author_id = u.id
+        WHERE
+            p.topic_id = $1;
+        ",
+        query.topic_id
+    )
+    .fetch_all(&state.db_pool)
+    .await
     .map_err(|_| ApiError::InternalServerError)?
     .iter()
-    .map(|p| PostDTO {
-        id: p.id,
-        author_id: p.author_id,
-        topic_id: p.topic_id,
-        text: p.text.clone(),
+    .map(|record| PostDTO {
+        id: record.post_id,
+        sender: UserDTO {
+            id: record.sender_id,
+            login: record.sender_login.clone(),
+        },
+        topic_id: record.topic_id,
+        text: record.post_text.clone(),
     })
     .collect();
 
@@ -49,18 +59,37 @@ pub async fn get_post(
     Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<PostDTO>), ApiError> {
-    let post = sqlx::query_as!(Post, "select * from posts where id = $1 limit 1", id)
-        .fetch_optional(&state.db_pool)
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    let record = sqlx::query!(
+        "
+        SELECT
+        p.id AS post_id,
+        p.topic_id AS topic_id,
+        p.text AS post_text,
+        u.id AS sender_id,
+        u.login AS sender_login
+        FROM
+            posts p
+        JOIN
+            users u ON p.author_id = u.id
+        WHERE
+            p.id = $1;
+        ",
+        id
+    )
+    .fetch_optional(&state.db_pool)
+    .await
+    .map_err(|_| ApiError::InternalServerError)?;
 
-    match post {
-        Some(post) => {
+    match record {
+        Some(record) => {
             let post_dto = PostDTO {
-                id: post.id,
-                author_id: post.author_id,
-                topic_id: post.topic_id,
-                text: post.text,
+                id: record.post_id,
+                sender: UserDTO {
+                    id: record.sender_id,
+                    login: record.sender_login.clone(),
+                },
+                topic_id: record.topic_id,
+                text: record.post_text.clone(),
             };
             Ok((StatusCode::OK, Json(post_dto)))
         }

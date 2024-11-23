@@ -9,28 +9,57 @@ use crate::{
         claims::Claims,
         common::ObjectCreatedDTO,
         topic::{CreateTopicDTO, TopicDTO, UpdateTopicDTO},
+        topic_category::TopicCategoryDTO,
+        user::UserDTO,
     },
     errors::ApiError,
     extractors::ValidatedJson,
-    models::Topic,
     state::ApplicationState,
 };
 
 pub async fn get_topics(
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<Vec<TopicDTO>>), ApiError> {
-    let topics = sqlx::query_as!(Topic, "select * from topics")
-        .fetch_all(&state.db_pool)
-        .await
-        .map_err(|_| ApiError::InternalServerError)?
-        .iter()
-        .map(|t| TopicDTO {
-            id: t.id,
-            author_id: t.author_id,
-            category_id: t.category_id,
-            name: t.name.clone(),
-        })
-        .collect();
+    let topics = sqlx::query!(
+        "
+        SELECT
+            t.id AS topic_id,
+            t.category_id AS category_id,
+            t.name AS topic_name,
+            u.id AS creator_id,
+            u.login AS creator_login,
+            tc.name AS category_name,
+            COUNT(p.id) AS posts_count
+        FROM
+            topics t
+        JOIN
+            users u ON t.author_id = u.id
+        JOIN
+            topics_categories tc ON t.category_id = tc.id
+        LEFT JOIN
+            posts p ON t.id = p.topic_id
+        GROUP BY
+            t.id, t.author_id, t.category_id, t.name, u.id, u.login, tc.name;
+        "
+    )
+    .fetch_all(&state.db_pool)
+    .await
+    .map_err(|_| ApiError::InternalServerError)?
+    .iter()
+    .map(|record| TopicDTO {
+        id: record.topic_id,
+        name: record.topic_name.clone(),
+        category: TopicCategoryDTO {
+            id: record.category_id,
+            name: record.category_name.clone(),
+        },
+        creator: UserDTO {
+            id: record.creator_id,
+            login: record.creator_login.clone(),
+        },
+        posts_count: record.posts_count.unwrap_or(0),
+    })
+    .collect();
 
     Ok((StatusCode::OK, Json(topics)))
 }
@@ -39,18 +68,49 @@ pub async fn get_topic(
     Path(id): Path<i64>,
     State(state): State<ApplicationState>,
 ) -> Result<(StatusCode, Json<TopicDTO>), ApiError> {
-    let topic = sqlx::query_as!(Topic, "select * from topics where id = $1 limit 1", id)
-        .fetch_optional(&state.db_pool)
-        .await
-        .map_err(|_| ApiError::InternalServerError)?;
+    let record = sqlx::query!(
+        "
+        SELECT
+            t.id AS topic_id,
+            t.category_id AS category_id,
+            t.name AS topic_name,
+            u.id AS creator_id,
+            u.login AS creator_login,
+            tc.name AS category_name,
+            COUNT(p.id) AS posts_count
+        FROM
+            topics t
+        JOIN
+            users u ON t.author_id = u.id
+        JOIN
+            topics_categories tc ON t.category_id = tc.id
+        LEFT JOIN
+            posts p ON t.id = p.topic_id
+        WHERE
+            t.id = $1
+        GROUP BY
+            t.id, t.author_id, t.category_id, t.name, u.id, u.login, tc.name;
+        ",
+        id
+    )
+    .fetch_optional(&state.db_pool)
+    .await
+    .map_err(|_| ApiError::InternalServerError)?;
 
-    match topic {
-        Some(topic) => {
+    match record {
+        Some(record) => {
             let topic_dto = TopicDTO {
-                id: topic.id,
-                author_id: topic.author_id,
-                category_id: topic.category_id,
-                name: topic.name,
+                id: record.topic_id,
+                name: record.topic_name.clone(),
+                category: TopicCategoryDTO {
+                    id: record.category_id,
+                    name: record.category_name.clone(),
+                },
+                creator: UserDTO {
+                    id: record.creator_id,
+                    login: record.creator_login.clone(),
+                },
+                posts_count: record.posts_count.unwrap_or(0),
             };
             Ok((StatusCode::OK, Json(topic_dto)))
         }

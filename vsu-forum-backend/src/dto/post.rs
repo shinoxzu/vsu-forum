@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+use super::user::UserDTO;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PostDTO {
     pub id: i64,
-    pub author_id: i64,
     pub topic_id: i64,
     pub text: String,
+    pub sender: UserDTO,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
@@ -18,7 +20,7 @@ pub struct CreatePostDTO {
 
 #[derive(Deserialize)]
 pub struct GetPostsDTO {
-    pub topic_id: Option<i64>,
+    pub topic_id: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
