@@ -7,6 +7,7 @@ import TopicPage from "./components/TopicPage.vue";
 import TopicCreationPage from "./components/TopicCreationPage.vue";
 import AvailableReactions from "./components/AvailableReactions.vue";
 import BookmarkedTopics from "./components/BookmarkedTopics.vue";
+import ReportsPage from "./components/ReportsPage.vue";
 
 const routes = [
     { path: "/", component: MainPage, name: "Home" },
@@ -16,7 +17,8 @@ const routes = [
     { path: "/profile", component: UserProfile, name: "Profile" },
     { path: "/available-reactions", component: AvailableReactions, name: "AvailableReaction" },
     { path: "/topics/:id", component: TopicPage, name: "Topic", props: true},
-    { path: "/bookmarks", component: BookmarkedTopics, name: "Bookmarks" }
+    { path: "/bookmarks", component: BookmarkedTopics, name: "Bookmarks" },
+    { path: "/reports", component: ReportsPage, name: "Reports" }
 ];
 
 const router = createRouter({

@@ -64,9 +64,10 @@ pub async fn create_report(
     ValidatedJson(create_report_dto): ValidatedJson<CreateReportDTO>,
 ) -> Result<(StatusCode, Json<ObjectCreatedDTO>), ApiError> {
     let result = sqlx::query_scalar!(
-        "insert into reports(author_id, reported_user_id) values ($1, $2) returning id",
+        "insert into reports(author_id, reported_user_id, reason) values ($1, $2, $3) returning id",
         claims.user_id,
         create_report_dto.reported_user_id,
+        create_report_dto.reason
     )
     .fetch_one(&state.db_pool)
     .await

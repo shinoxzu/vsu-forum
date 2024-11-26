@@ -27,8 +27,7 @@ create table reports (
     id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     author_id BIGINT NOT NULL references users(id) ON DELETE CASCADE,
     reported_user_id BIGINT NOT NULL references users(id) ON DELETE CASCADE,
-    reason text NOT NULL,
-    UNIQUE(author_id, reported_user_id)
+    reason text NOT NULL
 );
 
 create table bookmarks (
