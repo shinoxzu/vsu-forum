@@ -34,8 +34,7 @@ pub async fn get_reactions(
 }
 
 pub async fn add_reaction(
-    Path(post_id): Path<i64>,
-    Path(reaction_id): Path<i64>,
+    Path((post_id, reaction_id)): Path<(i64, i64)>,
     State(state): State<ApplicationState>,
     Extension(claims): Extension<Claims>,
 ) -> Result<StatusCode, ApiError> {
@@ -45,7 +44,7 @@ pub async fn add_reaction(
         claims.user_id,
         reaction_id,
     )
-    .fetch_one(&state.db_pool)
+    .execute(&state.db_pool)
     .await
     .map_err(|_| ApiError::InternalServerError)?;
 
@@ -53,8 +52,7 @@ pub async fn add_reaction(
 }
 
 pub async fn remove_reaction(
-    Path(post_id): Path<i64>,
-    Path(reaction_id): Path<i64>,
+    Path((post_id, reaction_id)): Path<(i64, i64)>,
     State(state): State<ApplicationState>,
     Extension(claims): Extension<Claims>,
 ) -> Result<StatusCode, ApiError> {

@@ -37,12 +37,28 @@ pub async fn create_bookmark(
     State(state): State<ApplicationState>,
     Extension(claims): Extension<Claims>,
 ) -> Result<(StatusCode, Json<BookmarkDTO>), ApiError> {
+    let existing_bookmark = sqlx::query_as!(
+        Bookmark,
+        "select * from bookmarks where user_id = $1 and topic_id = $2",
+        claims.user_id,
+        topic_id
+    )
+    .fetch_optional(&state.db_pool)
+    .await
+    .map_err(|_| ApiError::InternalServerError)?;
+
+    if existing_bookmark.is_some() {
+        return Err(ApiError::BadRequest(
+            "you already bookmarked this topic".to_string(),
+        ));
+    }
+
     sqlx::query!(
         "insert into bookmarks(user_id, topic_id) values ($1, $2)",
         claims.user_id,
         topic_id,
     )
-    .fetch_one(&state.db_pool)
+    .execute(&state.db_pool)
     .await
     .map_err(|_| ApiError::InternalServerError)?;
 

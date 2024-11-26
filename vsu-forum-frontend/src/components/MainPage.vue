@@ -1,59 +1,122 @@
 <script setup>
 import Button from "primevue/button";
-import { Dialog } from "primevue";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Message from "primevue/message";
 
 const topics = ref([]);
-const dialog1 = ref(false)
-const dialog2 = ref(false)
-const deleteRef = ref(null)
-const err = ref(false)
-const router = useRouter()
-
-watch(dialog1, () => {
-    if (!dialog1.value) {
-        dialog2.value = true
-        console.log(dialog2.value)
-        deleteRef.value.play()
-    }
-   
-})
-
-const removePost = async (id) => {
-    const token = localStorage.getItem("token");
-    const resp = await fetch("http://localhost:3000/topics/" + id, {
-        method: "DELETE",
-        headers: {
-            "Authorization":  `Bearer ${token}`
-        }
-    })
-    if (!resp.ok) {
-        console.log(resp.status)
-        err.value = true
-    } else {
-        topics.value.filter(t => t.id != id)
-    }
-}
+const router = useRouter();
+const showEditDialog = ref(false);
+const selectedTopicId = ref(null);
+const newTopicName = ref("");
+const errorMessages = ref([]);
+const errorId = ref(0);
 
 async function fetchTopics() {
     try {
         const response = await fetch("http://localhost:3000/topics");
+
         if (response.ok) {
             topics.value = await response.json();
         } else {
             topics.value = [];
-            console.error("Ошибка при загрузке топиков");
+            errorMessages.value.push({
+                content: "Ошибка при загрузке топиков",
+                id: errorId.value++,
+            });
         }
     } catch (error) {
         console.error("Ошибка сети:", error);
     }
 }
 
-const deleteClick = (e, id) => {
-    dialog1.value = !dialog1.value
-    removePost(id)
-    e.stopPropagation()
+async function removeTopic(id) {
+    const token = localStorage.getItem("token");
+
+    try {
+        const response = await fetch("http://localhost:3000/topics/" + id, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (response.ok) {
+            await fetchTopics();
+        } else {
+            errorMessages.value.push({
+                content: "Ошибка при удалении топика",
+                id: errorId.value++,
+            });
+        }
+    } catch (error) {
+        console.error("Ошибка сети:", error);
+    }
+}
+
+async function updateTopic() {
+    const token = localStorage.getItem("token");
+
+    try {
+        const response = await fetch(
+            `http://localhost:3000/topics/${selectedTopicId.value}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    name: newTopicName.value,
+                }),
+            },
+        );
+
+        if (response.ok) {
+            showEditDialog.value = false;
+            await fetchTopics();
+        } else {
+            errorMessages.value.push({
+                content: "Ошибка при обновлении топика",
+                id: errorId.value++,
+            });
+        }
+    } catch (error) {
+        console.error("Ошибка сети:", error);
+    }
+}
+
+async function bookmarkTopic(id) {
+    const token = localStorage.getItem("token");
+
+    try {
+        const response = await fetch(
+            `http://localhost:3000/topics/${id}/bookmark`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+
+        if (!response.ok) {
+            errorMessages.value.push({
+                content: "Ошибка при добавлении в закладки",
+                id: errorId.value++,
+            });
+        }
+    } catch (error) {
+        console.error("Ошибка сети:", error);
+    }
+}
+
+function openEditDialog(topic) {
+    selectedTopicId.value = topic.id;
+    newTopicName.value = topic.name;
+    showEditDialog.value = true;
 }
 
 onMounted(() => {
@@ -62,62 +125,65 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="main-page">
-        <div class="top-page">
-            <h2>Топики</h2>
-            <Button
-                as="router-link"
-                label="Создать топик"
-                to="/create-topic"
-                replace
-                style="text-decoration: none"
-            />
-        </div>
-        <div class="topics-container">
-           <div
-                style="text-decoration: none; color: white"
-                v-for="topic in topics"
-                :key="topic.id"
-                @click="router.push(`/topics/${topic.id}`)"
-            >
-                <div class="topic">
-                    <div>{{ topic.name }}
-                    <Button class="delete" @click="e => deleteClick(e, topic.id)">delete</Button>
-                    </div>
+    <div class="top-page">
+        <h2>Топики</h2>
+        <Button
+            as="router-link"
+            label="Создать топик"
+            to="/create-topic"
+            replace
+            style="text-decoration: none"
+        />
+    </div>
+
+    <div v-if="errorMessages.length > 0" class="errors-container">
+        <Message
+            v-for="msg of errorMessages"
+            :key="msg.id"
+            severity="error"
+            :life="3000"
+        >
+            {{ msg.content }}
+        </Message>
+    </div>
+
+    <div class="topics-container">
+        <div
+            style="text-decoration: none; color: white"
+            v-for="topic in topics"
+            :key="topic.id"
+            @click="router.push(`/topics/${topic.id}`)"
+        >
+            <div class="topic">
+                <div class="topic-name">{{ topic.name }}</div>
+                <div class="topic-action-buttons">
+                    <Button
+                        icon="pi pi-pencil"
+                        @click.stop="openEditDialog(topic)"
+                    />
+                    <Button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        @click.stop="removeTopic(topic.id)"
+                    />
+                    <Button
+                        icon="pi pi-bookmark"
+                        @click.stop="bookmarkTopic(topic.id)"
+                    />
                 </div>
             </div>
-            
         </div>
     </div>
-    <Dialog v-model:visible="dialog1" modal closable>
-        <div>
-        <video ref="deleteRef" width="1200" height="930" controls autoplay>
-  <source src="../assets/delete.mp4" type="video/mp4"  >
-  Your browser does not support the video tag.
-</video>
-</div>
-    </Dialog>
 
-    <Dialog v-model:visible="dialog2" closable position="left">
-        <img style="width: 800px; height: 500px;" src="../assets/p2.png" />
+    <Dialog v-model:visible="showEditDialog" modal header="Редактировать топик">
+        <div class="edit-form">
+            <InputText v-model="newTopicName" placeholder="Новое название" />
+            <Button label="Сохранить" @click="updateTopic" />
+        </div>
     </Dialog>
-    <Dialog v-model:visible="dialog2" closable position="right">
-        <img style="width: 800px; height: 500px;" src="../assets/p1.png" />
-    </Dialog>
-    <Dialog closable v-model:visible="err" position="top"><p>Упс! Произошла ошибка</p></Dialog>
 </template>
 
 <style scoped>
-
-.delete{
-display: block;
-align-self: end;
-background-color: red;
-color: white;
-}
-
-
-
 .topics-container {
     display: flex;
     flex-direction: column;
@@ -127,12 +193,22 @@ color: white;
 .topic {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
     gap: 10px;
     background-color: #222222;
     border-radius: 7px;
-    padding-left: 10px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px;
+}
+
+.topic-name {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.topic-action-buttons {
+    display: flex;
+    gap: 10px;
 }
 
 .main-page {
@@ -143,5 +219,16 @@ color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.errors-container {
+    margin-bottom: 1rem;
 }
 </style>

@@ -160,14 +160,17 @@ pub async fn patch_topic(
     State(state): State<ApplicationState>,
     ValidatedJson(update_topic_dto): ValidatedJson<UpdateTopicDTO>,
 ) -> Result<StatusCode, ApiError> {
-    let rows_affected = if let Some(name) = update_topic_dto.name {
-        sqlx::query!("update topics set name = $1 where id = $2", name, topic_id)
+    let mut rows_affected = 0;
+
+    if let Some(name) = update_topic_dto.name {
+        rows_affected = sqlx::query!("update topics set name = $1 where id = $2", name, topic_id)
             .execute(&state.db_pool)
             .await
             .map_err(|_| ApiError::InternalServerError)?
-            .rows_affected()
-    } else if let Some(category_id) = update_topic_dto.category_id {
-        sqlx::query!(
+            .rows_affected();
+    }
+    if let Some(category_id) = update_topic_dto.category_id {
+        rows_affected = sqlx::query!(
             "update topics set category_id = $1 where id = $2",
             category_id,
             topic_id
@@ -175,10 +178,8 @@ pub async fn patch_topic(
         .execute(&state.db_pool)
         .await
         .map_err(|_| ApiError::InternalServerError)?
-        .rows_affected()
-    } else {
-        0
-    };
+        .rows_affected();
+    }
 
     if rows_affected > 0 {
         Result::Ok(StatusCode::OK)

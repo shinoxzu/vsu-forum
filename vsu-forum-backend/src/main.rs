@@ -20,6 +20,10 @@ use sqlx::{migrate::Migrator, postgres::PgPoolOptions};
 use tower_http::cors::CorsLayer;
 
 use handlers::{
+    available_reactions::{
+        create_available_reaction, delete_available_reaction, get_available_reactions,
+        patch_available_reaction,
+    },
     bookmarks::{create_bookmark, get_bookmarks, remove_bookmark},
     posts::{create_post, get_post, get_posts, patch_post, remove_post},
     reactions::{add_reaction, get_reactions, remove_reaction},
@@ -76,6 +80,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/users/login", post(login_user))
         .route("/users/:id", get(get_user))
         .route("/topics", get(get_topics))
+        .route("/available-reactions", get(get_available_reactions))
         .route("/topics/:id", get(get_topic))
         .route("/topics-categories", get(get_topic_categories))
         .route("/topics-categories/:id", get(get_topic_category))
@@ -87,6 +92,12 @@ async fn main() -> anyhow::Result<()> {
 
     let secure_router = Router::new()
         .route("/users/me", get(get_me))
+        .route("/available-reactions", post(create_available_reaction))
+        .route(
+            "/available-reactions/:id",
+            delete(delete_available_reaction),
+        )
+        .route("/available-reactions/:id", patch(patch_available_reaction))
         .route("/topics", post(create_topic))
         .route("/topics/:id", delete(remove_topic))
         .route("/topics/:id", patch(patch_topic))

@@ -1,3 +1,4 @@
+pub mod available_reaction;
 pub mod bookmark;
 pub mod claims;
 pub mod common;

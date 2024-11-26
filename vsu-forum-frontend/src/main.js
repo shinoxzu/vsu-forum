@@ -4,14 +4,15 @@ import Aura from "@primevue/themes/aura";
 import App from "./App.vue";
 import router from "./router";
 import "./assets/main.css";
+import "primeicons/primeicons.css";
 
 async function loadLocales() {
     const primeReactLocaleFiles = import.meta.glob(
         "../node_modules/primelocale/*.json",
     );
-    
+
     const localeFiles = {};
-    
+
     for (const path in primeReactLocaleFiles) {
         if (Object.prototype.hasOwnProperty.call(primeReactLocaleFiles, path)) {
             const fileName = path.split("/").pop()?.replace(".json", "");
@@ -21,7 +22,7 @@ async function loadLocales() {
             }
         }
     }
-    
+
     return localeFiles;
 }
 

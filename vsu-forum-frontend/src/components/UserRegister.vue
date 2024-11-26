@@ -10,7 +10,7 @@ const username = ref("");
 const password = ref("");
 const passwordConfirmation = ref("");
 const errorMessages = ref([]);
-const count = ref(0);
+const errorId = ref(0);
 
 async function register() {
     try {
@@ -40,13 +40,13 @@ async function register() {
                 case 400:
                     errorMessages.value.push({
                         content: "Введены некорректные данные",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
                 case 500:
                     errorMessages.value.push({
                         content: "Произошла ошибка",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
             }
@@ -60,7 +60,7 @@ async function register() {
 <template>
     <div class="center-div">
         <h2>Регистрация</h2>
-        
+
         <div v-if="errorMessages.length != 0" class="errors-container">
             <transition-group>
                 <Message
@@ -72,7 +72,7 @@ async function register() {
                 >
             </transition-group>
         </div>
-        
+
         <Form @submit="register" class="simple-form">
             <InputText
                 v-model="username"

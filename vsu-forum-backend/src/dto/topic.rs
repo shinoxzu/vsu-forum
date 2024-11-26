@@ -23,13 +23,13 @@ pub struct ShortTopicDTO {
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct CreateTopicDTO {
     pub category_id: i64,
-    #[validate(length(min = 6, max = 30))]
+    #[validate(length(min = 1, max = 100))]
     pub name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct UpdateTopicDTO {
     pub category_id: Option<i64>,
-    #[validate(length(min = 1, max = 1000))]
+    #[validate(length(min = 1, max = 100))]
     pub name: Option<String>,
 }

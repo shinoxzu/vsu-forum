@@ -9,7 +9,7 @@ import Message from "primevue/message";
 const username = ref("");
 const password = ref("");
 const errorMessages = ref([]);
-const count = ref(0);
+const errorId = ref(0);
 
 async function login() {
     try {
@@ -34,13 +34,13 @@ async function login() {
                 case 401:
                     errorMessages.value.push({
                         content: "Неверный логин или пароль",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
                 case 500:
                     errorMessages.value.push({
                         content: "Произошла ошибка",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
             }
@@ -54,7 +54,7 @@ async function login() {
 <template>
     <div class="center-div">
         <h2>Вход в аккаунт</h2>
-        
+
         <div v-if="errorMessages.length != 0" class="errors-container">
             <transition-group>
                 <Message
@@ -66,7 +66,7 @@ async function login() {
                 >
             </transition-group>
         </div>
-        
+
         <Form @submit="login" class="simple-form">
             <InputText
                 v-model="username"

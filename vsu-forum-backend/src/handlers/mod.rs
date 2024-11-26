@@ -1,3 +1,4 @@
+pub mod available_reactions;
 pub mod bookmarks;
 pub mod posts;
 pub mod reactions;

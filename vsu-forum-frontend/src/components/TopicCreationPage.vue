@@ -5,14 +5,15 @@ import InputText from "primevue/inputtext";
 import AutoComplete from "primevue/autocomplete";
 import Button from "primevue/button";
 import Message from "primevue/message";
-import { Dialog } from "primevue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const newTopicName = ref(null);
 const selectedTopicCategory = ref(null);
 const topicCategories = ref([]);
 const filteredTopicCategories = ref([]);
 const errorMessages = ref([]);
-const count = ref(0);
+const errorId = ref(0);
 
 function search(event) {
     setTimeout(() => {
@@ -33,12 +34,14 @@ function search(event) {
 async function fetchCategories() {
     try {
         const response = await fetch("http://localhost:3000/topics-categories");
-        
+
         if (response.ok) {
             topicCategories.value = await response.json();
+            filteredTopicCategories.value = [...topicCategories.value];
         } else {
             console.error("Ошибка при загрузке категорий");
-            topicCategories.value = []
+            topicCategories.value = [];
+            filteredTopicCategories.value = [];
         }
     } catch (error) {
         console.error("Ошибка сети:", error);
@@ -47,7 +50,7 @@ async function fetchCategories() {
 
 async function createCategory() {
     errorMessages.value = [];
-    
+
     if (!selectedTopicCategory.value) return;
 
     try {
@@ -56,7 +59,7 @@ async function createCategory() {
             console.error("Токен не найден, авторизация не выполнена.");
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
-                id: count.value++,
+                id: errorId.value++,
             });
             return;
         }
@@ -74,20 +77,24 @@ async function createCategory() {
         );
 
         if (response.ok) {
-            fetchCategories();
-        }
-        else {
+            await fetchCategories();
+            const data = await response.json();
+            selectedTopicCategory.value = topicCategories.value.find(
+                (cat) => cat.id === data.id,
+            );
+            search({ query: "" });
+        } else {
             switch (response.status) {
                 case 400:
                     errorMessages.value.push({
                         content: "Введены некорректные данные",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
                 case 500:
                     errorMessages.value.push({
                         content: "Произошла ошибка",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
             }
@@ -99,7 +106,7 @@ async function createCategory() {
 
 async function createTopic() {
     errorMessages.value = [];
-    
+
     if (!newTopicName.value || !selectedTopicCategory.value) return;
 
     try {
@@ -108,7 +115,7 @@ async function createTopic() {
             console.error("Токен не найден, авторизация не выполнена.");
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
-                id: count.value++,
+                id: errorId.value++,
             });
             return;
         }
@@ -126,20 +133,20 @@ async function createTopic() {
         });
 
         if (response.ok) {
-        //  redirect   
-        }
-        else {
+            const data = await response.json();
+            router.push(`/topics/${data.id}`);
+        } else {
             switch (response.status) {
                 case 400:
                     errorMessages.value.push({
                         content: "Введены некорректные данные",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
                 case 500:
                     errorMessages.value.push({
                         content: "Произошла ошибка",
-                        id: count.value++,
+                        id: errorId.value++,
                     });
                     break;
             }
@@ -157,7 +164,7 @@ onMounted(() => {
 <template>
     <div class="center-div">
         <h2>Создание топика</h2>
-        
+
         <div v-if="errorMessages.length != 0" class="errors-container">
             <transition-group>
                 <Message
@@ -169,16 +176,15 @@ onMounted(() => {
                 >
             </transition-group>
         </div>
-        
+
         <Form @submit="createTopic" class="simple-form">
             <InputText
                 v-model="newTopicName"
                 placeholder="Название топика"
-                
                 style="width: 100%"
                 required
             />
-    
+
             <AutoComplete
                 v-model="selectedTopicCategory"
                 placeholder="Категория"
@@ -208,12 +214,8 @@ onMounted(() => {
                     </div>
                 </template>
             </AutoComplete>
-    
-            <Button
-                type="submit"
-                label="Создать топик"
-                icon="pi pi-check"
-            />
+
+            <Button type="submit" label="Создать топик" icon="pi pi-check" />
         </Form>
     </div>
 </template>

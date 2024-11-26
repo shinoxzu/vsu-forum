@@ -9,6 +9,6 @@ pub struct TopicCategoryDTO {
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct CreateTopicCategoryDTO {
-    #[validate(length(min = 2, max = 30))]
+    #[validate(length(min = 1, max = 40))]
     pub name: String,
 }

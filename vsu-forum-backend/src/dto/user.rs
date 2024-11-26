@@ -9,9 +9,9 @@ pub struct UserDTO {
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct RegisterDTO {
-    #[validate(length(min = 6, max = 24))]
+    #[validate(length(min = 3, max = 40))]
     pub login: String,
-    #[validate(length(min = 6, max = 24))]
+    #[validate(length(min = 3, max = 40))]
     pub password: String,
 }
 
