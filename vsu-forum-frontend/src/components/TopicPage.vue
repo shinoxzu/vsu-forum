@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useAuthStore } from "../stores/auth";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import Select from "primevue/select";
@@ -9,6 +10,7 @@ import Textarea from "primevue/textarea";
 import Message from "primevue/message";
 
 const route = useRoute();
+const authStore = useAuthStore();
 const topic = ref({});
 const posts = ref([]);
 const reactions = ref([]);
@@ -93,8 +95,7 @@ async function fetchPostReactions(postId) {
 }
 
 async function updateTopic() {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!authStore.isAuthorized) {
         errorMessages.value.push({
             content: "Необходимо войти в аккаунт",
             id: errorId.value++,
@@ -107,7 +108,7 @@ async function updateTopic() {
         {
             method: "PATCH",
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -139,8 +140,7 @@ async function updateTopic() {
 
 async function createPost() {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.isAuthorized) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -152,7 +152,7 @@ async function createPost() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
             body: JSON.stringify({
                 topic_id: parseInt(route.params.id, 10),
@@ -186,8 +186,7 @@ async function createPost() {
 
 async function deletePost(postId) {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.isAuthorized) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -198,7 +197,7 @@ async function deletePost(postId) {
         const response = await fetch(`http://localhost:3000/posts/${postId}`, {
             method: "DELETE",
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
         });
 
@@ -223,8 +222,7 @@ function openEditPostDialog(post) {
 
 async function updatePost() {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.isAuthorized) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -238,7 +236,7 @@ async function updatePost() {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
                 body: JSON.stringify({
                     text: editedPostText.value,
@@ -262,8 +260,7 @@ async function updatePost() {
 
 async function addReaction(postId, reactionId) {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.isAuthorized) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -274,13 +271,13 @@ async function addReaction(postId, reactionId) {
         const response = await fetch(
             `http://localhost:3000/posts/${postId}/reactions/${reactionId}`,
             {
-                method: "POST", // Changed from DELETE to POST
+                method: "POST",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
             }
         );
-        
+
         if (response.ok) {
             await fetchPostReactions(postId);
         } else {
@@ -301,8 +298,7 @@ async function addReaction(postId, reactionId) {
 
 async function removeReaction(postId, reactionId) {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.isAuthorized) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -315,11 +311,11 @@ async function removeReaction(postId, reactionId) {
             {
                 method: "DELETE",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
             }
         );
-        
+
         if (response.ok) {
             await fetchPostReactions(postId);
         } else {
@@ -346,11 +342,9 @@ function hasUserReaction(postId, reactionId) {
 }
 
 function getCurrentUserId() {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-
+    if (!authStore.isAuthorized) return null;
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = JSON.parse(atob(authStore.token.split('.')[1]));
         return payload.user_id;
     } catch (e) {
         return null;

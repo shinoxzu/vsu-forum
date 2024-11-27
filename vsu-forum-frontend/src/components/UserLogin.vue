@@ -1,11 +1,15 @@
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { Form } from "@primevue/forms";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Message from "primevue/message";
+import { useAuthStore } from "../stores/auth";
 
+const router = useRouter();
+const authStore = useAuthStore();
 const username = ref("");
 const password = ref("");
 const errorMessages = ref([]);
@@ -27,8 +31,8 @@ async function login() {
         });
         if (response.ok) {
             const data = await response.json();
-            localStorage.setItem("token", data.token);
-            console.log("Вход успешен!", data);
+            authStore.setToken(data.token);
+            router.push('/');
         } else {
             switch (response.status) {
                 case 401:

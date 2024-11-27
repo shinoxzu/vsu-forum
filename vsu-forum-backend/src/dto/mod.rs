@@ -6,6 +6,7 @@ pub mod error;
 pub mod post;
 pub mod reactions;
 pub mod report;
+pub mod search;
 pub mod topic;
 pub mod topic_category;
 pub mod user;

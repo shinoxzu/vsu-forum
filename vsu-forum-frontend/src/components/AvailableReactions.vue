@@ -4,7 +4,9 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import { ref, onMounted } from "vue";
+import { useAuthStore } from "../stores/auth";
 
+const authStore = useAuthStore();
 const reactions = ref([]);
 const showDialog = ref(false);
 const isEditing = ref(false);
@@ -43,7 +45,7 @@ async function saveReaction() {
             method,
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
             body: JSON.stringify({ reaction: reactionToEdit.value }),
         });
@@ -71,7 +73,7 @@ async function deleteReaction(id) {
             {
                 method: "DELETE",
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
             },
         );
@@ -172,7 +174,6 @@ onMounted(async () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 
 .reactions-list {

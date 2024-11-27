@@ -6,8 +6,10 @@ import AutoComplete from "primevue/autocomplete";
 import Button from "primevue/button";
 import Message from "primevue/message";
 import { useRouter } from "vue-router";
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const newTopicName = ref(null);
 const selectedTopicCategory = ref(null);
 const topicCategories = ref([]);
@@ -54,9 +56,7 @@ async function createCategory() {
     if (!selectedTopicCategory.value) return;
 
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("Токен не найден, авторизация не выполнена.");
+        if (!authStore.isAuthorized) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -70,7 +70,7 @@ async function createCategory() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
                 body: JSON.stringify({ name: selectedTopicCategory.value }),
             },
@@ -110,9 +110,7 @@ async function createTopic() {
     if (!newTopicName.value || !selectedTopicCategory.value) return;
 
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("Токен не найден, авторизация не выполнена.");
+        if (!authStore.isAuthorized) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -124,7 +122,7 @@ async function createTopic() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
             body: JSON.stringify({
                 name: newTopicName.value,

@@ -1,6 +1,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from '../stores/auth';
+import Button from "primevue/button";
 
+const router = useRouter();
+const authStore = useAuthStore();
 const username = ref("");
 
 async function fetchProfile() {
@@ -28,6 +33,11 @@ async function fetchProfile() {
     }
 }
 
+function logout() {
+    authStore.setToken(null);
+    router.push("/login");
+}
+
 onMounted(fetchProfile);
 </script>
 
@@ -36,5 +46,6 @@ onMounted(fetchProfile);
         <h2>Профиль</h2>
         <p v-if="username">Логин: {{ username }}</p>
         <p v-else>Загрузка профиля...</p>
+        <Button @click="logout" label="Выйти" severity="danger" />
     </div>
 </template>

@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { createPinia } from 'pinia'
 import PrimeVue from "primevue/config";
 import Aura from "@primevue/themes/aura";
 import App from "./App.vue";
@@ -29,13 +30,12 @@ async function loadLocales() {
 const localeFiles = await loadLocales();
 
 const app = createApp(App);
-
+app.use(createPinia())
 app.use(PrimeVue, {
     theme: {
         preset: Aura,
     },
     locale: localeFiles.ru.ru,
 });
-
 app.use(router);
 app.mount("#app");

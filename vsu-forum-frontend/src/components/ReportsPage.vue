@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useAuthStore } from '../stores/auth';
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import Message from "primevue/message";
 
+const authStore = useAuthStore();
 const reports = ref([]);
 const showCreateDialog = ref(false);
 const showEditDialog = ref(false);
@@ -21,8 +23,7 @@ onMounted(() => {
 
 async function fetchReports() {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.token) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -32,7 +33,7 @@ async function fetchReports() {
 
         const response = await fetch("http://localhost:3000/reports", {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
         });
 
@@ -56,8 +57,7 @@ async function fetchReports() {
 
 async function createReport() {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.token) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -69,7 +69,7 @@ async function createReport() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
             body: JSON.stringify({
                 reported_user_id: parseInt(reportedUserId.value),
@@ -106,8 +106,7 @@ function openEditDialog(report) {
 
 async function updateReport() {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.token) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -121,7 +120,7 @@ async function updateReport() {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
                 body: JSON.stringify({
                     reason: reportReason.value,
@@ -152,8 +151,7 @@ async function updateReport() {
 
 async function deleteReport(id) {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.token) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -164,7 +162,7 @@ async function deleteReport(id) {
         const response = await fetch(`http://localhost:3000/reports/${id}`, {
             method: "DELETE",
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
         });
 
@@ -280,7 +278,6 @@ async function deleteReport(id) {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 
 .reports-list {

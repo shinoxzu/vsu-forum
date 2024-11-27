@@ -5,9 +5,11 @@ import { useRouter } from "vue-router";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
+import { useAuthStore } from "../stores/auth";
 
 const topics = ref([]);
 const router = useRouter();
+const authStore = useAuthStore();
 const showEditDialog = ref(false);
 const selectedTopicId = ref(null);
 const newTopicName = ref("");
@@ -33,13 +35,11 @@ async function fetchTopics() {
 }
 
 async function removeTopic(id) {
-    const token = localStorage.getItem("token");
-
     try {
         const response = await fetch("http://localhost:3000/topics/" + id, {
             method: "DELETE",
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
         });
 
@@ -57,8 +57,6 @@ async function removeTopic(id) {
 }
 
 async function updateTopic() {
-    const token = localStorage.getItem("token");
-
     try {
         const response = await fetch(
             `http://localhost:3000/topics/${selectedTopicId.value}`,
@@ -66,7 +64,7 @@ async function updateTopic() {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
                 body: JSON.stringify({
                     name: newTopicName.value,
@@ -89,15 +87,13 @@ async function updateTopic() {
 }
 
 async function bookmarkTopic(id) {
-    const token = localStorage.getItem("token");
-
     try {
         const response = await fetch(
             `http://localhost:3000/topics/${id}/bookmark`,
             {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
             },
         );

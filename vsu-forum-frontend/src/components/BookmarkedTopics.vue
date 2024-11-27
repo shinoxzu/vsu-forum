@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from '../stores/auth';
 import Button from "primevue/button";
 import Message from "primevue/message";
 
 const router = useRouter();
+const authStore = useAuthStore();
 const bookmarks = ref([]);
 const topics = ref([]);
 const errorMessages = ref([]);
@@ -12,8 +14,7 @@ const errorId = ref(0);
 
 async function fetchBookmarks() {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.token) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -23,7 +24,7 @@ async function fetchBookmarks() {
 
         const response = await fetch("http://localhost:3000/bookmarks", {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${authStore.token}`,
             },
         });
 
@@ -67,8 +68,7 @@ async function fetchTopicDetails() {
 
 async function removeBookmark(topicId) {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        if (!authStore.token) {
             errorMessages.value.push({
                 content: "Необходимо войти в аккаунт",
                 id: errorId.value++,
@@ -81,7 +81,7 @@ async function removeBookmark(topicId) {
             {
                 method: "DELETE",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authStore.token}`,
                 },
             },
         );
