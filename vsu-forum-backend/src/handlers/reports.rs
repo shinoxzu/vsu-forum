@@ -63,6 +63,20 @@ pub async fn create_report(
     Extension(claims): Extension<Claims>,
     ValidatedJson(create_report_dto): ValidatedJson<CreateReportDTO>,
 ) -> Result<(StatusCode, Json<ObjectCreatedDTO>), ApiError> {
+    // Check if reported user exists
+    let user_exists = sqlx::query_scalar!(
+        "SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)",
+        create_report_dto.reported_user_id
+    )
+    .fetch_one(&state.db_pool)
+    .await
+    .map_err(|_| ApiError::InternalServerError)?
+    .unwrap_or(false);
+
+    if !user_exists {
+        return Err(ApiError::NotFound("user not found".to_string()));
+    }
+
     let result = sqlx::query_scalar!(
         "insert into reports(author_id, reported_user_id, reason) values ($1, $2, $3) returning id",
         claims.user_id,

@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -9,6 +10,7 @@ pub struct PostDTO {
     pub topic_id: i64,
     pub text: String,
     pub sender: UserDTO,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]

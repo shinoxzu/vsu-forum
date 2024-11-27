@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -10,6 +11,7 @@ pub struct TopicDTO {
     pub category: TopicCategoryDTO,
     pub creator: UserDTO,
     pub posts_count: i64,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -18,6 +20,7 @@ pub struct ShortTopicDTO {
     pub author_id: i64,
     pub category_id: i64,
     pub name: String,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]

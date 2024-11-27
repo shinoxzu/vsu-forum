@@ -13,14 +13,16 @@ create table topics (
     id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     author_id BIGINT NOT NULL references users(id) ON DELETE CASCADE,
     category_id BIGINT NOT NULL references topics_categories(id) ON DELETE CASCADE,
-    name text NOT NULL
+    name text NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 create table posts (
     id BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     topic_id BIGINT NOT NULL references topics(id) ON DELETE CASCADE,
     author_id BIGINT NOT NULL references users(id) ON DELETE CASCADE,
-    text text NOT NULL
+    text text NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 create table reports (

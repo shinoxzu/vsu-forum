@@ -25,6 +25,7 @@ pub async fn get_posts(
         SELECT
             p.id AS post_id,
             p.topic_id AS topic_id,
+            p.created_at as created_at,
             p.text AS post_text,
             u.id AS sender_id,
             u.login AS sender_login
@@ -43,6 +44,7 @@ pub async fn get_posts(
     .iter()
     .map(|record| PostDTO {
         id: record.post_id,
+        created_at: record.created_at,
         sender: UserDTO {
             id: record.sender_id,
             login: record.sender_login.clone(),
@@ -64,6 +66,7 @@ pub async fn get_post(
         SELECT
         p.id AS post_id,
         p.topic_id AS topic_id,
+        p.created_at as created_at,
         p.text AS post_text,
         u.id AS sender_id,
         u.login AS sender_login
@@ -84,6 +87,7 @@ pub async fn get_post(
         Some(record) => {
             let post_dto = PostDTO {
                 id: record.post_id,
+                created_at: record.created_at,
                 sender: UserDTO {
                     id: record.sender_id,
                     login: record.sender_login.clone(),

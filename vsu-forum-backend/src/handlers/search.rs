@@ -25,6 +25,7 @@ pub async fn search(
             t.id AS topic_id,
             t.category_id AS category_id,
             t.name AS topic_name,
+            t.created_at as created_at,
             u.id AS creator_id,
             u.login AS creator_login,
             tc.name AS category_name,
@@ -61,6 +62,7 @@ pub async fn search(
     .iter()
     .map(|record| TopicDTO {
         id: record.topic_id,
+        created_at: record.created_at,
         name: record.topic_name.clone(),
         category: TopicCategoryDTO {
             id: record.category_id,

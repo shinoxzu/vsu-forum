@@ -6,6 +6,7 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import { useAuthStore } from "../stores/auth";
+import { formatRelativeTime } from "../utils/date";
 
 const topics = ref([]);
 const router = useRouter();
@@ -15,6 +16,20 @@ const selectedTopicId = ref(null);
 const newTopicName = ref("");
 const errorMessages = ref([]);
 const errorId = ref(0);
+const sortOrder = ref("newest");
+
+function toggleSortOrder() {
+    sortOrder.value = sortOrder.value === "newest" ? "oldest" : "newest";
+    sortTopics();
+}
+
+function sortTopics() {
+    topics.value.sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return sortOrder.value === "newest" ? dateB - dateA : dateA - dateB;
+    });
+}
 
 async function fetchTopics() {
     try {
@@ -22,6 +37,7 @@ async function fetchTopics() {
 
         if (response.ok) {
             topics.value = await response.json();
+            sortTopics();
         } else {
             topics.value = [];
             errorMessages.value.push({
@@ -122,14 +138,23 @@ onMounted(() => {
 
 <template>
     <div class="top-page">
-        <h2>Топики</h2>
-        <Button
-            as="router-link"
-            label="Создать топик"
-            to="/create-topic"
-            replace
-            style="text-decoration: none"
-        />
+        <div class="header-container">
+            <h2>Топики</h2>
+            <Button
+                icon="pi pi-sort"
+                @click="toggleSortOrder"
+                :label="
+                    sortOrder === 'newest' ? 'Сначала новые' : 'Сначала старые'
+                "
+            />
+            <Button
+                as="router-link"
+                label="Создать топик"
+                to="/create-topic"
+                replace
+                style="text-decoration: none"
+            />
+        </div>
     </div>
 
     <div v-if="errorMessages.length > 0" class="errors-container">
@@ -151,7 +176,12 @@ onMounted(() => {
             @click="router.push(`/topics/${topic.id}`)"
         >
             <div class="topic">
-                <div class="topic-name">{{ topic.name }}</div>
+                <div class="topic-info">
+                    <div class="topic-name">{{ topic.name }}</div>
+                    <div class="topic-date">
+                        {{ formatRelativeTime(topic.created_at) }}
+                    </div>
+                </div>
                 <div class="topic-action-buttons">
                     <Button
                         icon="pi pi-pencil"
@@ -196,10 +226,19 @@ onMounted(() => {
     padding: 20px;
 }
 
-.topic-name {
+.topic-info {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    gap: 5px;
+}
+
+.topic-name {
+    font-size: 1.1em;
+}
+
+.topic-date {
+    font-size: 0.9em;
+    color: #888;
 }
 
 .topic-action-buttons {
@@ -214,6 +253,13 @@ onMounted(() => {
 .top-page {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-container {
+    display: flex;
+    gap: 15px;
     align-items: center;
 }
 

@@ -8,6 +8,7 @@ import Select from "primevue/select";
 import Dialog from "primevue/dialog";
 import Textarea from "primevue/textarea";
 import Message from "primevue/message";
+import { formatDate, formatRelativeTime } from "../utils/date";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -58,6 +59,10 @@ async function fetchPosts() {
 
         if (response.ok) {
             posts.value = await response.json();
+            // Sort posts by creation date
+            posts.value.sort(
+                (a, b) => new Date(a.created_at) - new Date(b.created_at),
+            );
             for (let post of posts.value) {
                 fetchPostReactions(post.id);
             }
@@ -384,6 +389,9 @@ async function fetchCategories() {
                 <InputText type="text" v-model="editedTopicName" />
                 <div class="topic-details">
                     <p>Создатель: {{ topic.creator?.login }}</p>
+                    <p v-if="topic.created_at" class="topic-date">
+                        Создано: {{ formatRelativeTime(topic.created_at) }}
+                    </p>
                     <Select
                         v-model="selectedCategory"
                         :options="topicCategories"
@@ -409,7 +417,15 @@ async function fetchCategories() {
         <div class="posts-container" v-if="posts.length">
             <div class="post" v-for="post in posts" :key="post.id">
                 <div class="post-header">
-                    <span class="author">{{ post.sender.login }}</span>
+                    <div class="post-header-info">
+                        <span class="author">{{ post.sender.login }}</span>
+                        <span
+                            class="post-date"
+                            :title="formatDate(post.created_at)"
+                        >
+                            {{ formatRelativeTime(post.created_at) }}
+                        </span>
+                    </div>
                     <div class="post-actions">
                         <Button
                             icon="pi pi-pencil"
@@ -509,6 +525,11 @@ async function fetchCategories() {
     align-items: center;
 }
 
+.topic-date {
+    color: #888;
+    font-size: 0.9em;
+}
+
 .posts-container {
     display: flex;
     flex-direction: column;
@@ -529,8 +550,19 @@ async function fetchCategories() {
     margin-bottom: 10px;
 }
 
+.post-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .author {
     font-weight: bold;
+}
+
+.post-date {
+    color: #888;
+    font-size: 0.9em;
 }
 
 .post-actions {

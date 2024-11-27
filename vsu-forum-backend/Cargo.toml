@@ -4,14 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-chrono = { version = "0.4" }
+chrono = { version = "0.4", features = ["serde"] }
 thiserror = { version = "2.0" }
 async-trait = { version = "0.1" }
 validator = { version = "0.18", features = ["derive"] }
 jsonwebtoken = "9"
 sha3 = { version = "0.10" }
-axum = {version = "0.7", features = ["macros", "query"] }
-sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "migrate", "macros"] }
+axum = { version = "0.7", features = ["macros", "query"] }
+sqlx = { version = "0.8", features = [
+    "runtime-tokio",
+    "postgres",
+    "migrate",
+    "macros",
+    "chrono",
+] }
 anyhow = "1.0"
 tokio = { version = "1.40", features = ["full"] }
 tower-http = { version = "0.6", features = ["catch-panic", "cors"] }
