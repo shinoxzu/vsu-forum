@@ -32,7 +32,7 @@ async function login() {
         if (response.ok) {
             const data = await response.json();
             authStore.setToken(data.token);
-            router.push('/');
+            router.push("/");
         } else {
             switch (response.status) {
                 case 401:

@@ -6,7 +6,7 @@ import AutoComplete from "primevue/autocomplete";
 import Button from "primevue/button";
 import Message from "primevue/message";
 import { useRouter } from "vue-router";
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
 const authStore = useAuthStore();

@@ -71,7 +71,9 @@ async function fetchPosts() {
 
 async function fetchAvailableReactions() {
     try {
-        const response = await fetch("http://localhost:3000/available-reactions");
+        const response = await fetch(
+            "http://localhost:3000/available-reactions",
+        );
         if (response.ok) {
             availableReactions.value = await response.json();
         }
@@ -83,7 +85,7 @@ async function fetchAvailableReactions() {
 async function fetchPostReactions(postId) {
     try {
         const response = await fetch(
-            `http://localhost:3000/posts/${postId}/reactions`
+            `http://localhost:3000/posts/${postId}/reactions`,
         );
         if (response.ok) {
             const postReactions = await response.json();
@@ -241,7 +243,7 @@ async function updatePost() {
                 body: JSON.stringify({
                     text: editedPostText.value,
                 }),
-            }
+            },
         );
 
         if (response.ok) {
@@ -275,7 +277,7 @@ async function addReaction(postId, reactionId) {
                 headers: {
                     Authorization: `Bearer ${authStore.token}`,
                 },
-            }
+            },
         );
 
         if (response.ok) {
@@ -313,7 +315,7 @@ async function removeReaction(postId, reactionId) {
                 headers: {
                     Authorization: `Bearer ${authStore.token}`,
                 },
-            }
+            },
         );
 
         if (response.ok) {
@@ -337,14 +339,15 @@ async function removeReaction(postId, reactionId) {
 function hasUserReaction(postId, reactionId) {
     if (!reactions.value[postId]) return false;
     return reactions.value[postId].some(
-        r => r.reaction_id === reactionId && r.author_id === getCurrentUserId()
+        (r) =>
+            r.reaction_id === reactionId && r.author_id === getCurrentUserId(),
     );
 }
 
 function getCurrentUserId() {
     if (!authStore.isAuthorized) return null;
     try {
-        const payload = JSON.parse(atob(authStore.token.split('.')[1]));
+        const payload = JSON.parse(atob(authStore.token.split(".")[1]));
         return payload.user_id;
     } catch (e) {
         return null;
@@ -425,16 +428,27 @@ async function fetchCategories() {
                 </div>
                 <div class="post-content">{{ post.text }}</div>
                 <div class="reactions">
-                    <div v-for="reaction in availableReactions" :key="reaction.id">
+                    <div
+                        v-for="reaction in availableReactions"
+                        :key="reaction.id"
+                    >
                         <Button
                             :label="reaction.reaction"
-                            :severity="hasUserReaction(post.id, reaction.id) ? 'success' : 'secondary'"
+                            :severity="
+                                hasUserReaction(post.id, reaction.id)
+                                    ? 'success'
+                                    : 'secondary'
+                            "
                             text
                             rounded
                             @click="toggleReaction(post.id, reaction.id)"
                         />
                         <span v-if="reactions[post.id]">
-                            {{ reactions[post.id].filter(r => r.reaction_id === reaction.id).length }}
+                            {{
+                                reactions[post.id].filter(
+                                    (r) => r.reaction_id === reaction.id,
+                                ).length
+                            }}
                         </span>
                     </div>
                 </div>
@@ -453,7 +467,11 @@ async function fetchCategories() {
             </div>
         </div>
 
-        <Dialog v-model:visible="showEditDialog" modal header="Редактировать пост">
+        <Dialog
+            v-model:visible="showEditDialog"
+            modal
+            header="Редактировать пост"
+        >
             <div class="edit-post-form">
                 <Textarea
                     v-model="editedPostText"

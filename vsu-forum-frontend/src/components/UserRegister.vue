@@ -6,7 +6,7 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Message from "primevue/message";
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -38,7 +38,7 @@ async function register() {
         if (response.ok) {
             const data = await response.json();
             authStore.setToken(data.token);
-            router.push('/');
+            router.push("/");
         } else {
             switch (response.status) {
                 case 400:
