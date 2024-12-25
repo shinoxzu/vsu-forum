@@ -9,6 +9,7 @@ import Dialog from "primevue/dialog";
 import Textarea from "primevue/textarea";
 import Message from "primevue/message";
 import { formatDate, formatRelativeTime } from "../utils/date";
+import Paginator from "primevue/paginator";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -25,6 +26,11 @@ const selectedCategory = ref(null);
 const topicCategories = ref([]);
 const errorMessages = ref([]);
 const errorId = ref(0);
+
+const first = ref(0);
+const rowsPerPage = ref(10);
+const totalPosts = ref(0);
+const displayedPosts = ref([]);
 
 onMounted(() => {
     fetchTopic();
@@ -59,13 +65,15 @@ async function fetchPosts() {
 
         if (response.ok) {
             posts.value = await response.json();
-            // Sort posts by creation date
+            console.log(posts.value);
+            totalPosts.value = posts.value.length;
             posts.value.sort(
                 (a, b) => new Date(a.created_at) - new Date(b.created_at),
             );
             for (let post of posts.value) {
                 fetchPostReactions(post.id);
             }
+            updateDisplayedPosts();
         } else {
             console.error("Ошибка при загрузке постов");
         }
@@ -209,6 +217,7 @@ async function deletePost(postId) {
         });
 
         if (response.ok) {
+            first.value = 0;
             await fetchPosts();
         } else {
             errorMessages.value.push({
@@ -252,6 +261,7 @@ async function updatePost() {
         );
 
         if (response.ok) {
+            first.value = 0;
             showEditDialog.value = false;
             await fetchPosts();
         } else {
@@ -380,6 +390,21 @@ async function fetchCategories() {
         console.error("Ошибка сети:", error);
     }
 }
+
+function updateDisplayedPosts() {
+    const startIndex = first.value;
+    const endIndex = Math.min(
+        startIndex + rowsPerPage.value,
+        posts.value.length,
+    );
+    displayedPosts.value = posts.value.slice(startIndex, endIndex);
+}
+
+function onPage(event) {
+    first.value = event.first;
+    rowsPerPage.value = event.rows;
+    updateDisplayedPosts();
+}
 </script>
 
 <template>
@@ -415,7 +440,7 @@ async function fetchCategories() {
         </div>
 
         <div class="posts-container" v-if="posts.length">
-            <div class="post" v-for="post in posts" :key="post.id">
+            <div class="post" v-for="post in displayedPosts" :key="post.id">
                 <div class="post-header">
                     <div class="post-header-info">
                         <span class="author">{{ post.sender.login }}</span>
@@ -482,6 +507,16 @@ async function fetchCategories() {
                 <Button @click="createPost" label="Отправить" />
             </div>
         </div>
+
+        <Paginator
+            v-model:first="first"
+            v-model:rows="rowsPerPage"
+            :totalRecords="totalPosts"
+            :rowsPerPageOptions="[5, 10, 20, 30]"
+            @page="onPage"
+            template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            class="paginator"
+        />
 
         <Dialog
             v-model:visible="showEditDialog"

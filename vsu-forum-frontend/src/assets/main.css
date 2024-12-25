@@ -21,3 +21,10 @@
     gap: 10px;
     margin-bottom: 10px;
 }
+
+.paginator {
+    margin-top: 1rem;
+    background-color: #222222;
+    border-radius: 7px;
+    padding: 0.5rem;
+}

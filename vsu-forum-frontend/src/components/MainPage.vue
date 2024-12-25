@@ -7,6 +7,7 @@ import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import { useAuthStore } from "../stores/auth";
 import { formatRelativeTime } from "../utils/date";
+import Paginator from "primevue/paginator";
 
 const topics = ref([]);
 const router = useRouter();
@@ -18,17 +19,15 @@ const errorMessages = ref([]);
 const errorId = ref(0);
 const sortOrder = ref("newest");
 
+const first = ref(0);
+const rowsPerPage = ref(10);
+const totalTopics = ref(0);
+const displayedTopics = ref([]);
+
 function toggleSortOrder() {
     sortOrder.value = sortOrder.value === "newest" ? "oldest" : "newest";
+    first.value = 0;
     sortTopics();
-}
-
-function sortTopics() {
-    topics.value.sort((a, b) => {
-        const dateA = new Date(a.created_at);
-        const dateB = new Date(b.created_at);
-        return sortOrder.value === "newest" ? dateB - dateA : dateA - dateB;
-    });
 }
 
 async function fetchTopics() {
@@ -37,7 +36,9 @@ async function fetchTopics() {
 
         if (response.ok) {
             topics.value = await response.json();
+            totalTopics.value = topics.value.length;
             sortTopics();
+            updateDisplayedTopics();
         } else {
             topics.value = [];
             errorMessages.value.push({
@@ -60,6 +61,7 @@ async function removeTopic(id) {
         });
 
         if (response.ok) {
+            first.value = 0;
             await fetchTopics();
         } else {
             errorMessages.value.push({
@@ -90,6 +92,7 @@ async function updateTopic() {
 
         if (response.ok) {
             showEditDialog.value = false;
+            first.value = 0;
             await fetchTopics();
         } else {
             errorMessages.value.push({
@@ -129,6 +132,30 @@ function openEditDialog(topic) {
     selectedTopicId.value = topic.id;
     newTopicName.value = topic.name;
     showEditDialog.value = true;
+}
+
+function updateDisplayedTopics() {
+    const startIndex = first.value;
+    const endIndex = Math.min(
+        startIndex + rowsPerPage.value,
+        topics.value.length,
+    );
+    displayedTopics.value = topics.value.slice(startIndex, endIndex);
+}
+
+function sortTopics() {
+    topics.value.sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return sortOrder.value === "newest" ? dateB - dateA : dateA - dateB;
+    });
+    updateDisplayedTopics();
+}
+
+function onPage(event) {
+    first.value = event.first;
+    rowsPerPage.value = event.rows;
+    updateDisplayedTopics();
 }
 
 onMounted(() => {
@@ -171,7 +198,7 @@ onMounted(() => {
     <div class="topics-container">
         <div
             style="text-decoration: none; color: white"
-            v-for="topic in topics"
+            v-for="topic in displayedTopics"
             :key="topic.id"
             @click="router.push(`/topics/${topic.id}`)"
         >
@@ -200,6 +227,16 @@ onMounted(() => {
             </div>
         </div>
     </div>
+
+    <Paginator
+        v-model:first="first"
+        v-model:rows="rowsPerPage"
+        :totalRecords="totalTopics"
+        :rowsPerPageOptions="[5, 10, 20, 30]"
+        @page="onPage"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        class="paginator"
+    />
 
     <Dialog v-model:visible="showEditDialog" modal header="Редактировать топик">
         <div class="edit-form">
