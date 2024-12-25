@@ -29,6 +29,7 @@ use handlers::{
     reactions::{add_reaction, get_reactions, remove_reaction},
     reports::{create_report, get_report, get_reports, patch_report, remove_report},
     search::search,
+    stats::get_stats,
     topics::{create_topic, get_topic, get_topics, patch_topic, remove_topic},
     topics_categories::{
         create_topic_category, get_topic_categories, get_topic_category, remove_topic_category,
@@ -90,7 +91,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/posts/:post_id/reactions", get(get_reactions))
         .route("/reports", get(get_reports))
         .route("/reports/:id", get(get_report))
-        .route("/search", get(search));
+        .route("/search", get(search))
+        .route("/stats", get(get_stats));
 
     let secure_router = Router::new()
         .route("/users/me", get(get_me))

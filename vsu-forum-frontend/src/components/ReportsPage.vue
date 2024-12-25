@@ -12,7 +12,7 @@ const reports = ref([]);
 const showCreateDialog = ref(false);
 const showEditDialog = ref(false);
 const selectedReport = ref(null);
-const reportedUserId = ref("");
+const reportedUsername = ref("");
 const reportReason = ref("");
 const errorMessages = ref([]);
 const errorId = ref(0);
@@ -72,14 +72,14 @@ async function createReport() {
                 Authorization: `Bearer ${authStore.token}`,
             },
             body: JSON.stringify({
-                reported_user_id: parseInt(reportedUserId.value),
+                reported_user_name: reportedUsername.value,
                 reason: reportReason.value,
             }),
         });
 
         if (response.ok) {
             showCreateDialog.value = false;
-            reportedUserId.value = "";
+            reportedUsername.value = "";
             reportReason.value = "";
             await fetchReports();
         } else {
@@ -213,7 +213,7 @@ async function deleteReport(id) {
                     <span class="report-id">ID жалобы: {{ report.id }}</span>
                     <span class="user-ids">
                         Автор: {{ report.author_id }} | На пользователя:
-                        {{ report.reported_user_id }}
+                        {{ report.reported_user_name }}
                     </span>
                 </div>
                 <div class="report-reason">
@@ -242,13 +242,8 @@ async function deleteReport(id) {
     <Dialog v-model:visible="showCreateDialog" modal header="Создать жалобу">
         <div class="dialog-form">
             <div class="form-field">
-                <label>ID пользователя</label>
-                <InputText
-                    v-model="reportedUserId"
-                    type="number"
-                    min="1"
-                    required
-                />
+                <label>Имя пользователя</label>
+                <InputText v-model="reportedUsername" type="text" required />
             </div>
             <div class="form-field">
                 <label>Причина</label>

@@ -4,6 +4,7 @@ pub mod posts;
 pub mod reactions;
 pub mod reports;
 pub mod search;
+pub mod stats;
 pub mod topics;
 pub mod topics_categories;
 pub mod users;

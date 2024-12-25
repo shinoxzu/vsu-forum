@@ -76,6 +76,7 @@ function toggleMenu() {
                     to="/available-reactions"
                 />
             </template>
+            <Button as="router-link" label="Статистика" to="/stats" />
         </nav>
         <div class="search-field">
             <InputText
