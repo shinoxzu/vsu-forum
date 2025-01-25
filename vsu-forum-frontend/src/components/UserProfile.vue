@@ -42,7 +42,7 @@ onMounted(fetchProfile);
 </script>
 
 <template>
-    <div class="profile">
+    <div>
         <h2>Профиль</h2>
         <p v-if="username">Логин: {{ username }}</p>
         <p v-else>Загрузка профиля...</p>

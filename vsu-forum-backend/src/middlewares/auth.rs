@@ -8,7 +8,7 @@ use axum::{
 use jsonwebtoken::{decode, DecodingKey, Validation};
 
 use crate::{
-    dto::{claims::Claims, error::ErrorDTO},
+    dto::{claims::Claims, errors::ErrorDTO},
     ApplicationState,
 };
 

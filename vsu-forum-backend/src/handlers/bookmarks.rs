@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::{
-    dto::{bookmark::BookmarkDTO, claims::Claims},
+    dto::{bookmarks::BookmarkDTO, claims::Claims},
     errors::ApiError,
     models::Bookmark,
     state::ApplicationState,

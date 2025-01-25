@@ -337,8 +337,4 @@ async function deleteReport(id) {
     flex-direction: column;
     gap: 5px;
 }
-
-.errors-container {
-    margin-bottom: 15px;
-}
 </style>

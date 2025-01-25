@@ -8,9 +8,9 @@ use crate::{
     dto::{
         claims::Claims,
         common::ObjectCreatedDTO,
-        topic::{CreateTopicDTO, TopicDTO, UpdateTopicDTO},
-        topic_category::TopicCategoryDTO,
-        user::UserDTO,
+        topic_categories::TopicCategoryDTO,
+        topics::{CreateTopicDTO, TopicDTO, UpdateTopicDTO},
+        users::UserDTO,
     },
     errors::ApiError,
     extractors::ValidatedJson,

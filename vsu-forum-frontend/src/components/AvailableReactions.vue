@@ -218,8 +218,4 @@ onMounted(async () => {
     flex-direction: column;
     gap: 5px;
 }
-
-.errors-container {
-    margin-bottom: 15px;
-}
 </style>

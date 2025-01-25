@@ -6,7 +6,7 @@ use axum::{
 
 use crate::{
     dto::{
-        available_reaction::{
+        available_reactions::{
             AvailableReactionDTO, CreateAvailableReactionDTO, UpdateAvailableReactionDTO,
         },
         common::ObjectCreatedDTO,

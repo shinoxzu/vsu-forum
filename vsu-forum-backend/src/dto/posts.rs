@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use super::user::UserDTO;
+use super::users::UserDTO;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PostDTO {

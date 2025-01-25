@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use super::{topic_category::TopicCategoryDTO, user::UserDTO};
+use super::{topic_categories::TopicCategoryDTO, users::UserDTO};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TopicDTO {

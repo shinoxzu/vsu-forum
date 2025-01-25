@@ -8,7 +8,7 @@ use crate::{
     dto::{
         claims::Claims,
         common::ObjectCreatedDTO,
-        report::{CreateReportDTO, ReportDTO, UpdateReportDTO},
+        reports::{CreateReportDTO, ReportDTO, UpdateReportDTO},
     },
     errors::ApiError,
     extractors::ValidatedJson,

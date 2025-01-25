@@ -6,8 +6,8 @@ use axum::{
 
 use crate::{
     dto::{
-        search::SearchQueryParamsDTO, topic::TopicDTO, topic_category::TopicCategoryDTO,
-        user::UserDTO,
+        search::SearchQueryParamsDTO, topic_categories::TopicCategoryDTO, topics::TopicDTO,
+        users::UserDTO,
     },
     errors::ApiError,
     state::ApplicationState,

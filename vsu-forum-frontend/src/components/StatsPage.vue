@@ -145,8 +145,4 @@ async function fetchStats() {
     font-weight: bold;
     color: #fff;
 }
-
-.errors-container {
-    margin-bottom: 15px;
-}
 </style>

@@ -8,8 +8,8 @@ use crate::{
     dto::{
         claims::Claims,
         common::ObjectCreatedDTO,
-        post::{CreatePostDTO, GetPostsDTO, PostDTO, UpdatePostDTO},
-        user::UserDTO,
+        posts::{CreatePostDTO, GetPostsDTO, PostDTO, UpdatePostDTO},
+        users::UserDTO,
     },
     errors::ApiError,
     extractors::ValidatedJson,

@@ -9,7 +9,7 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use crate::{
     dto::{
         claims::Claims,
-        user::{AuthorizedUserDTO, LoginDTO, RegisterDTO, UserDTO},
+        users::{AuthorizedUserDTO, LoginDTO, RegisterDTO, UserDTO},
     },
     errors::ApiError,
     extractors::ValidatedJson,

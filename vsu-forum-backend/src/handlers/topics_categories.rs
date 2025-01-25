@@ -7,7 +7,7 @@ use axum::{
 use crate::{
     dto::{
         common::ObjectCreatedDTO,
-        topic_category::{CreateTopicCategoryDTO, TopicCategoryDTO},
+        topic_categories::{CreateTopicCategoryDTO, TopicCategoryDTO},
     },
     errors::ApiError,
     extractors::ValidatedJson,

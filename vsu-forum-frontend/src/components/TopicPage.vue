@@ -635,8 +635,4 @@ function onPage(event) {
     gap: 10px;
     padding: 20px;
 }
-
-.errors-container {
-    margin-bottom: 15px;
-}
 </style>

@@ -1,3 +1,4 @@
+pub mod config;
 pub mod dto;
 mod errors;
 mod extractors;
@@ -5,7 +6,7 @@ pub mod handlers;
 mod middlewares;
 pub mod models;
 pub mod state;
-pub mod tools;
+mod tools;
 
 use std::{env::var, path::Path, str::FromStr};
 
@@ -43,12 +44,12 @@ async fn main() -> anyhow::Result<()> {
     let config_path = match var("CONFIG_PATH") {
         Ok(variable) => variable,
         Err(err) => {
-            println!("cannot parse config path from env; trying dev config (caused: {err}");
+            println!("cannot parse config path from env; using dev config (caused: {err})");
             "config.dev.toml".to_string()
         }
     };
 
-    let config = tools::load_config(&config_path).context("cannot load config")?;
+    let config = config::load_config(&config_path).context("cannot load config")?;
 
     Builder::new()
         .filter_level(
@@ -67,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
 
     Migrator::new(Path::new("./migrations"))
         .await
-        .expect("cannot load migtations")
+        .expect("cannot load migrations")
         .run(&db_pool)
         .await
         .expect("cannot run migrations");

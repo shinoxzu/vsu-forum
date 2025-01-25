@@ -154,10 +154,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.bookmarks-page {
-    padding: 20px;
-}
-
 .page-header {
     margin-bottom: 20px;
 }
@@ -206,9 +202,5 @@ onMounted(async () => {
     text-align: center;
     padding: 40px;
     color: #cccccc;
-}
-
-.errors-container {
-    margin-bottom: 20px;
 }
 </style>

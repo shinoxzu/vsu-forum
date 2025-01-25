@@ -283,10 +283,6 @@ onMounted(() => {
     gap: 10px;
 }
 
-.main-page {
-    padding: 20px;
-}
-
 .top-page {
     display: flex;
     justify-content: space-between;
@@ -305,9 +301,5 @@ onMounted(() => {
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
-}
-
-.errors-container {
-    margin-bottom: 1rem;
 }
 </style>

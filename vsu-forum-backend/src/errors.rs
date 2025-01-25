@@ -1,6 +1,6 @@
 use axum::{http::StatusCode, response::IntoResponse, Json};
 
-use crate::dto::error::ErrorDTO;
+use crate::dto::errors::ErrorDTO;
 
 pub enum ApiError {
     InternalServerError,
